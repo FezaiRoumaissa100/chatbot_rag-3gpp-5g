@@ -1,0 +1,160 @@
+{
+  "total_questions": 30,
+  "metrics": {
+    "faithfulness_ragas": 0.964,
+    "answer_relevancy_ragas": 0.795,
+    "answer_correctness_ragas": 0.638
+  },
+  "per_question": {
+    "Q01": {
+      "faithfulness": 0.58,
+      "answer_relevancy": 0.903,
+      "answer_correctness": 0.556
+    },
+    "Q02": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.988,
+      "answer_correctness": 0.654
+    },
+    "Q03": {
+      "faithfulness": 0.92,
+      "answer_relevancy": 0.94,
+      "answer_correctness": 0.632
+    },
+    "Q04": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.96,
+      "answer_correctness": 0.587
+    },
+    "Q05": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.959,
+      "answer_correctness": 0.971
+    },
+    "Q06": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.622,
+      "answer_correctness": 0.652
+    },
+    "Q07": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.884,
+      "answer_correctness": 0.785
+    },
+    "Q08": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.908,
+      "answer_correctness": 0.981
+    },
+    "Q09": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.84,
+      "answer_correctness": 0.711
+    },
+    "Q10": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.688,
+      "answer_correctness": 0.652
+    },
+    "Q11": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.808,
+      "answer_correctness": 0.582
+    },
+    "Q12": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.697,
+      "answer_correctness": 0.831
+    },
+    "Q13": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.815,
+      "answer_correctness": 0.507
+    },
+    "Q14": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.791,
+      "answer_correctness": 0.511
+    },
+    "Q15": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.897,
+      "answer_correctness": 0.864
+    },
+    "Q16": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.722,
+      "answer_correctness": 0.654
+    },
+    "Q17": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.809,
+      "answer_correctness": 0.436
+    },
+    "Q18": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.735,
+      "answer_correctness": 0.957
+    },
+    "Q19": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.74,
+      "answer_correctness": 0.592
+    },
+    "Q20": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.714,
+      "answer_correctness": 0.574
+    },
+    "Q21": {
+      "faithfulness": 0.833,
+      "answer_relevancy": 0.84,
+      "answer_correctness": 0.306
+    },
+    "Q22": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.631,
+      "answer_correctness": 0.683
+    },
+    "Q23": {
+      "faithfulness": 0.667,
+      "answer_relevancy": 0.578,
+      "answer_correctness": 0.34
+    },
+    "Q24": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.566,
+      "answer_correctness": 0.754
+    },
+    "Q25": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.797,
+      "answer_correctness": 0.632
+    },
+    "Q26": {
+      "faithfulness": 0.917,
+      "answer_relevancy": 0.821,
+      "answer_correctness": 0.687
+    },
+    "Q27": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.828,
+      "answer_correctness": 0.508
+    },
+    "Q28": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.806,
+      "answer_correctness": 0.647
+    },
+    "Q29": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.784,
+      "answer_correctness": 0.54
+    },
+    "Q30": {
+      "faithfulness": 1.0,
+      "answer_relevancy": 0.792,
+      "answer_correctness": 0.349
+    }
+  }
+}

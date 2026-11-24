@@ -1,0 +1,442 @@
+[
+  {
+    "id": "Q01",
+    "category": "single_23501",
+    "question": "What are the main functions of the Access and Mobility Management Function (AMF) in the 5G System?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.1" }
+    ],
+    "key_facts": [
+      "Termination of RAN CP interface (N2) and NAS (N1)",
+      "NAS ciphering and integrity protection",
+      "Registration management, connection management, reachability management, and mobility management"
+    ],
+    "reference_answer": "The AMF terminates the RAN CP interface (N2) and NAS signalling (N1), handles NAS ciphering and integrity protection, and manages registration, connection, reachability, and mobility."
+  },
+  {
+    "id": "Q02",
+    "category": "single_23501",
+    "question": "What are the primary responsibilities of the Session Management Function (SMF)?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.2" }
+    ],
+    "key_facts": [
+      "PDU Session establishment, modification, and release",
+      "UE IP address allocation and management",
+      "Selection and control of User Plane Function (UPF)"
+    ],
+    "reference_answer": "The SMF handles PDU session establishment, modification, and release, allocates and manages UE IP addresses, and selects and controls the UPF."
+  },
+  {
+    "id": "Q03",
+    "category": "single_23501",
+    "question": "What functionalities does the User Plane Function (UPF) provide in 5GS?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.3" }
+    ],
+    "key_facts": [
+      "Anchor point for Intra-/Inter-RAT mobility",
+      "Packet routing and forwarding",
+      "Packet inspection, QoS handling for user plane, and traffic usage reporting"
+    ],
+    "reference_answer": "The UPF acts as an anchor point for mobility, performs packet routing and forwarding, packet inspection, user plane QoS enforcement, and traffic usage reporting."
+  },
+  {
+    "id": "Q04",
+    "category": "single_23501",
+    "question": "What is the role of the Network Repository Function (NRF) in the 5G Service-Based Architecture?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.6" }
+    ],
+    "key_facts": [
+      "Supports service discovery function",
+      "Maintains NF profile of available NF instances and their supported services",
+      "Allows NF instances to register, update, and deregister their profiles"
+    ],
+    "reference_answer": "The NRF supports service discovery by maintaining NF profiles of available Network Function instances and their supported services."
+  },
+  {
+    "id": "Q05",
+    "category": "single_23501",
+    "question": "What do the reference points N1, N2, N3, N4, and N6 connect in the 5G System architecture?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "4.2.2" }
+    ],
+    "key_facts": [
+      "N1: UE and AMF",
+      "N2: (R)AN and AMF; N3: (R)AN and UPF",
+      "N4: SMF and UPF; N6: UPF and Data Network (DN)"
+    ],
+    "reference_answer": "N1 connects the UE and AMF, N2 connects the (R)AN and AMF, N3 connects the (R)AN and UPF, N4 connects the SMF and UPF, and N6 connects the UPF and Data Network."
+  },
+  {
+    "id": "Q06",
+    "category": "single_23501",
+    "question": "What are the two Registration Management (RM) states in 5GS and what do they represent?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.3.2" }
+    ],
+    "key_facts": [
+      "RM-DEREGISTERED and RM-REGISTERED",
+      "In RM-DEREGISTERED, the UE is not registered with the network and the AMF holds no valid location or routing information",
+      "In RM-REGISTERED, the UE is registered and can receive services requiring registration"
+    ],
+    "reference_answer": "The two states are RM-DEREGISTERED (the UE is not registered and cannot be reached by the network) and RM-REGISTERED (the UE has a valid registration context in the AMF and can access network services)."
+  },
+  {
+    "id": "Q07",
+    "category": "single_23501",
+    "question": "Explain the difference between CM-IDLE and CM-CONNECTED states in Connection Management.",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.3.3" }
+    ],
+    "key_facts": [
+      "CM-IDLE: UE has no NAS signalling connection established with the AMF over N1",
+      "CM-CONNECTED: UE has a NAS signalling connection established with the AMF over N1",
+      "Transition from CM-IDLE to CM-CONNECTED is triggered by AN signalling connection establishment"
+    ],
+    "reference_answer": "In CM-IDLE, the UE has no NAS signalling connection with the AMF over N1, whereas in CM-CONNECTED an N1 NAS signalling connection is established between the UE and the AMF."
+  },
+  {
+    "id": "Q08",
+    "category": "single_23501",
+    "question": "What are the three Session and Service Continuity (SSC) modes defined for a PDU Session?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.6.9" }
+    ],
+    "key_facts": [
+      "SSC mode 1: the network preserves the connectivity service and the same UPF anchor is maintained",
+      "SSC mode 2: the network releases the connectivity service and instructs the UE to establish a new PDU session (break-before-make)",
+      "SSC mode 3: changes to the user plane can be visible to the UE, allowing a new PDU session to be established before releasing the old one (make-before-break)"
+    ],
+    "reference_answer": "SSC mode 1 preserves the same UPF anchor throughout the session; SSC mode 2 releases the existing PDU session before establishing a new one; SSC mode 3 allows establishing a new PDU session anchor before releasing the previous one."
+  },
+  {
+    "id": "Q09",
+    "category": "single_23501",
+    "question": "How does the 5G QoS model work and what are QoS Flows, QFI, and 5QI?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.7.1" }
+    ],
+    "key_facts": [
+      "The QoS Flow is the finest granularity of QoS differentiation in a PDU Session",
+      "QoS Flow ID (QFI) uniquely identifies a QoS Flow within a PDU Session",
+      "5G QoS Identifier (5QI) is a scalar used as a reference to 5G QoS characteristics"
+    ],
+    "reference_answer": "The 5G QoS model is based on QoS Flows, which represent the finest granularity of QoS differentiation within a PDU session. Each flow is identified by a QFI and associated with a 5QI scalar defining its QoS forwarding characteristics."
+  },
+  {
+    "id": "Q10",
+    "category": "single_23501",
+    "question": "How is a Network Slice identified in 5GS using S-NSSAI and NSSAI?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.15.2" }
+    ],
+    "key_facts": [
+      "S-NSSAI identifies a Network Slice and comprises a Slice/Service Type (SST) and an optional Slice Differentiator (SD)",
+      "NSSAI is a collection of S-NSSAIs",
+      "Types include Configured NSSAI, Requested NSSAI, and Allowed NSSAI"
+    ],
+    "reference_answer": "A network slice is identified by an S-NSSAI consisting of a Slice/Service Type (SST) and an optional Slice Differentiator (SD). An NSSAI is a collection of S-NSSAIs."
+  },
+  {
+    "id": "Q11",
+    "category": "single_24501",
+    "question": "What does cause #9 mean in 5GMM?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "9.11.3.2" }
+    ],
+    "key_facts": [
+      "5GMM cause #9 corresponds to 'UE identity cannot be derived by the network'",
+      "Sent by the network when it cannot derive the UE identity (e.g., from 5G-GUTI)"
+    ],
+    "reference_answer": "In 5GMM, cause #9 means 'UE identity cannot be derived by the network'."
+  },
+  {
+    "id": "Q12",
+    "category": "single_24501",
+    "question": "What NAS messages are exchanged during the primary authentication and key agreement procedure?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "5.4.1" }
+    ],
+    "key_facts": [
+      "AUTHENTICATION REQUEST sent by the AMF to the UE",
+      "AUTHENTICATION RESPONSE or AUTHENTICATION FAILURE sent by the UE to the AMF",
+      "AUTHENTICATION REJECT sent by the AMF if authentication fails"
+    ],
+    "reference_answer": "The AMF sends an AUTHENTICATION REQUEST to the UE, which replies with an AUTHENTICATION RESPONSE or AUTHENTICATION FAILURE. If authentication is rejected, the AMF sends an AUTHENTICATION REJECT message."
+  },
+  {
+    "id": "Q13",
+    "category": "single_24501",
+    "question": "Describe the NAS security mode control procedure and the messages involved.",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "5.4.2" }
+    ],
+    "key_facts": [
+      "Initiated by the AMF to establish or modify a 5G NAS security context",
+      "AMF sends SECURITY MODE COMMAND (integrity protected) containing selected NAS security algorithms",
+      "UE replies with SECURITY MODE COMPLETE (integrity protected and ciphered) or SECURITY MODE REJECT"
+    ],
+    "reference_answer": "The AMF initiates the security mode control procedure by sending a SECURITY MODE COMMAND containing the selected ciphering and integrity algorithms. The UE responds with SECURITY MODE COMPLETE (or SECURITY MODE REJECT)."
+  },
+  {
+    "id": "Q14",
+    "category": "single_24501",
+    "question": "When is 5GMM timer T3510 started, stopped, and what happens upon its expiry?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "10.2" }
+    ],
+    "key_facts": [
+      "Started when the UE sends REGISTRATION REQUEST",
+      "Stopped upon receiving REGISTRATION ACCEPT or REGISTRATION REJECT",
+      "On expiry, the UE aborts the registration procedure and may re-attempt registration (starting T3511)"
+    ],
+    "reference_answer": "Timer T3510 is started when the UE transmits a REGISTRATION REQUEST, stopped when REGISTRATION ACCEPT or REGISTRATION REJECT is received, and upon expiry causes the UE to abort the procedure and initiate recovery."
+  },
+  {
+    "id": "Q15",
+    "category": "single_24501",
+    "question": "What is the purpose of timer T3512 in 5GMM?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "10.2" }
+    ],
+    "key_facts": [
+      "Controls periodic registration update in the UE",
+      "Started when the UE enters 5GMM-IDLE mode over 3GPP access",
+      "On expiry, the UE initiates a periodic registration update procedure"
+    ],
+    "reference_answer": "Timer T3512 is the periodic registration update timer in the UE. It starts when the UE enters 5GMM-IDLE mode and triggers a periodic registration update procedure upon expiry."
+  },
+  {
+    "id": "Q16",
+    "category": "single_24501",
+    "question": "How does the UE-initiated de-registration procedure work at the NAS level?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "5.5.2" }
+    ],
+    "key_facts": [
+      "UE sends DEREGISTRATION REQUEST (UE originating) indicating de-registration type and access type",
+      "Network responds with DEREGISTRATION ACCEPT (unless switch-off is indicated)",
+      "UE enters 5GMM-DEREGISTERED state"
+    ],
+    "reference_answer": "The UE sends a DEREGISTRATION REQUEST to the AMF and starts timer T3521. Unless the UE is switching off, the AMF replies with a DEREGISTRATION ACCEPT, and the UE transitions to 5GMM-DEREGISTERED."
+  },
+  {
+    "id": "Q17",
+    "category": "single_24501",
+    "question": "What NAS messages are used in the Service Request procedure and when does the UE initiate it?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "5.6.1" }
+    ],
+    "key_facts": [
+      "Initiated by a UE in 5GMM-IDLE mode to transition to 5GMM-CONNECTED mode (e.g., for uplink signalling/user data or paging response)",
+      "UE sends SERVICE REQUEST",
+      "Network responds with SERVICE ACCEPT or SERVICE REJECT"
+    ],
+    "reference_answer": "A UE in 5GMM-IDLE mode initiates the service request procedure by sending a SERVICE REQUEST message (e.g., to send uplink data or respond to paging), and the AMF responds with SERVICE ACCEPT or SERVICE REJECT."
+  },
+  {
+    "id": "Q18",
+    "category": "single_24501",
+    "question": "What are the main 5GMM states in the UE defined in TS 24.501?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "5.1.3" }
+    ],
+    "key_facts": [
+      "5GMM-NULL, 5GMM-DEREGISTERED, 5GMM-REGISTERED-INITIATED, 5GMM-REGISTERED, 5GMM-DEREGISTERED-INITIATED, 5GMM-SERVICE-REQUEST-INITIATED"
+    ],
+    "reference_answer": "The main 5GMM states in the UE include 5GMM-NULL, 5GMM-DEREGISTERED, 5GMM-REGISTERED-INITIATED, 5GMM-REGISTERED, 5GMM-DEREGISTERED-INITIATED, and 5GMM-SERVICE-REQUEST-INITIATED."
+  },
+  {
+    "id": "Q19",
+    "category": "single_24501",
+    "question": "What NAS messages are exchanged during the UE-requested PDU session establishment procedure?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "6.4.1" }
+    ],
+    "key_facts": [
+      "UE sends PDU SESSION ESTABLISHMENT REQUEST (encapsulated in UL NAS TRANSPORT)",
+      "Network replies with PDU SESSION ESTABLISHMENT ACCEPT or PDU SESSION ESTABLISHMENT REJECT (encapsulated in DL NAS TRANSPORT)"
+    ],
+    "reference_answer": "The UE sends a PDU SESSION ESTABLISHMENT REQUEST carried inside an UL NAS TRANSPORT message, and the network responds with a PDU SESSION ESTABLISHMENT ACCEPT or REJECT inside a DL NAS TRANSPORT message."
+  },
+  {
+    "id": "Q20",
+    "category": "single_24501",
+    "question": "What do 5GSM cause #26 and cause #27 indicate during session management procedures?",
+    "expected_sections": [
+      { "specification": "TS 24.501", "section": "9.11.4.2" }
+    ],
+    "key_facts": [
+      "5GSM cause #26: Insufficient resources",
+      "5GSM cause #27: Missing or unknown DNN"
+    ],
+    "reference_answer": "In 5GSM, cause #26 indicates 'Insufficient resources' and cause #27 indicates 'Missing or unknown DNN'."
+  },
+  {
+    "id": "Q21",
+    "category": "cross_spec",
+    "question": "Describe the registration procedure and the NAS messages exchanged between the UE and the AMF.",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.1" },
+      { "specification": "TS 24.501", "section": "5.5.1" }
+    ],
+    "key_facts": [
+      "AMF terminates N1 NAS signalling and manages registration",
+      "UE sends REGISTRATION REQUEST to AMF",
+      "Authentication and Security Mode Control may occur, followed by REGISTRATION ACCEPT from AMF and REGISTRATION COMPLETE from UE (or REGISTRATION REJECT)"
+    ],
+    "reference_answer": "The AMF manages registration over N1. The UE sends a REGISTRATION REQUEST to the AMF; after optional authentication and security mode control, the AMF replies with REGISTRATION ACCEPT (or REGISTRATION REJECT), and the UE confirms with REGISTRATION COMPLETE when required."
+  },
+  {
+    "id": "Q22",
+    "category": "cross_spec",
+    "question": "Which network function is responsible for NAS ciphering and integrity protection, and how is secure NAS message exchange established during registration?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.1" },
+      { "specification": "TS 24.501", "section": "4.4.2" }
+    ],
+    "key_facts": [
+      "The AMF handles NAS ciphering and integrity protection",
+      "Established via the NAS security mode control procedure (SECURITY MODE COMMAND / COMPLETE) during registration"
+    ],
+    "reference_answer": "The AMF is responsible for NAS ciphering and integrity protection. Secure exchange of NAS messages is established by the AMF initiating the security mode control procedure during registration."
+  },
+  {
+    "id": "Q23",
+    "category": "cross_spec",
+    "question": "How does the SMF manage PDU sessions in the 5G architecture, and what 5GSM NAS messages are exchanged with the UE to establish a PDU session?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.2" },
+      { "specification": "TS 24.501", "section": "6.4.1" }
+    ],
+    "key_facts": [
+      "SMF manages PDU session establishment, modification, release, IP allocation, and UPF control",
+      "UE sends PDU SESSION ESTABLISHMENT REQUEST and receives PDU SESSION ESTABLISHMENT ACCEPT or REJECT via NAS transport"
+    ],
+    "reference_answer": "The SMF controls PDU session establishment, IP address allocation, and UPF selection in the 5GC, while the UE and network exchange PDU SESSION ESTABLISHMENT REQUEST and ACCEPT/REJECT messages encapsulated in NAS TRANSPORT messages."
+  },
+  {
+    "id": "Q24",
+    "category": "cross_spec",
+    "question": "How do the 5GS Registration Management states (RM-DEREGISTERED and RM-REGISTERED) correspond to the UE 5GMM states in the NAS protocol?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.3.2" },
+      { "specification": "TS 24.501", "section": "5.1.3" }
+    ],
+    "key_facts": [
+      "TS 23.501 defines RM-DEREGISTERED and RM-REGISTERED at the system architecture level",
+      "TS 24.501 refines these into 5GMM-DEREGISTERED, 5GMM-REGISTERED-INITIATED, 5GMM-REGISTERED, and 5GMM-DEREGISTERED-INITIATED in the UE"
+    ],
+    "reference_answer": "The system-level RM-DEREGISTERED and RM-REGISTERED states in TS 23.501 correspond to the detailed NAS protocol state machine in TS 24.501, including 5GMM-DEREGISTERED, 5GMM-REGISTERED-INITIATED, 5GMM-REGISTERED, and 5GMM-DEREGISTERED-INITIATED."
+  },
+  {
+    "id": "Q25",
+    "category": "cross_spec",
+    "question": "How does a UE transition from CM-IDLE to CM-CONNECTED in 5GS, and which NAS procedure and messages are used to trigger this transition?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.3.3" },
+      { "specification": "TS 24.501", "section": "5.6.1" }
+    ],
+    "key_facts": [
+      "CM-IDLE to CM-CONNECTED establishes an N1 NAS signalling connection between UE and AMF",
+      "Triggered by the NAS Service Request procedure using SERVICE REQUEST and SERVICE ACCEPT"
+    ],
+    "reference_answer": "To transition from CM-IDLE to CM-CONNECTED and establish an N1 NAS signalling connection with the AMF, the UE initiates the NAS service request procedure by sending a SERVICE REQUEST message and receiving SERVICE ACCEPT."
+  },
+  {
+    "id": "Q26",
+    "category": "cross_spec",
+    "question": "What is the role of the AUSF in 5G authentication, and how does the AMF execute primary authentication with the UE over NAS?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "6.2.5" },
+      { "specification": "TS 24.501", "section": "5.4.1" }
+    ],
+    "key_facts": [
+      "AUSF supports authentication for 3GPP and untrusted non-3GPP access",
+      "AMF exchanges AUTHENTICATION REQUEST and AUTHENTICATION RESPONSE/FAILURE/REJECT with the UE over NAS"
+    ],
+    "reference_answer": "The AUSF acts as the authentication server function in the 5GC, while the AMF executes primary authentication over NAS with the UE using AUTHENTICATION REQUEST, AUTHENTICATION RESPONSE (or FAILURE), and AUTHENTICATION REJECT."
+  },
+  {
+    "id": "Q27",
+    "category": "cross_spec",
+    "question": "How is Network Slicing (S-NSSAI / NSSAI) defined in the 5G architecture, and how does the UE provide its Requested NSSAI during NAS registration?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.15.2" },
+      { "specification": "TS 24.501", "section": "5.5.1" }
+    ],
+    "key_facts": [
+      "S-NSSAI consists of SST and optional SD; NSSAI is a collection of S-NSSAIs",
+      "The UE includes the Requested NSSAI IE in the REGISTRATION REQUEST message and receives Allowed NSSAI in REGISTRATION ACCEPT"
+    ],
+    "reference_answer": "Network slices are identified by S-NSSAI (SST + optional SD) grouped into an NSSAI. During NAS registration, the UE sends its Requested NSSAI in the REGISTRATION REQUEST message and receives the Allowed NSSAI in the REGISTRATION ACCEPT."
+  },
+  {
+    "id": "Q28",
+    "category": "cross_spec",
+    "question": "What are the SSC modes in 5GS architecture, and how is the SSC mode indicated during the NAS PDU session establishment procedure?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.6.9" },
+      { "specification": "TS 24.501", "section": "6.4.1" }
+    ],
+    "key_facts": [
+      "SSC modes 1, 2, and 3 define anchor UPF preservation or reselection behavior",
+      "The UE can include the SSC mode IE in PDU SESSION ESTABLISHMENT REQUEST, and the network includes the selected SSC mode in PDU SESSION ESTABLISHMENT ACCEPT"
+    ],
+    "reference_answer": "TS 23.501 defines SSC modes 1, 2, and 3 for UPF anchor continuity. At the NAS layer, the UE may request an SSC mode in PDU SESSION ESTABLISHMENT REQUEST and the SMF confirms the selected SSC mode in PDU SESSION ESTABLISHMENT ACCEPT."
+  },
+  {
+    "id": "Q29",
+    "category": "cross_spec",
+    "question": "How are QoS Flows and 5QI structured in 5GS, and how are QoS rules delivered to the UE during NAS PDU session establishment?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "5.7.1" },
+      { "specification": "TS 24.501", "section": "6.4.1" }
+    ],
+    "key_facts": [
+      "QoS Flows identified by QFI and mapped to 5QI QoS characteristics",
+      "Authorized QoS rules (and optional QoS flow descriptions) are sent to the UE in the PDU SESSION ESTABLISHMENT ACCEPT message"
+    ],
+    "reference_answer": "In 5GS, traffic is mapped to QoS Flows identified by a QFI and governed by a 5QI. During NAS PDU session establishment, the network delivers the authorized QoS rules to the UE inside the PDU SESSION ESTABLISHMENT ACCEPT message."
+  },
+  {
+    "id": "Q30",
+    "category": "cross_spec",
+    "question": "How does the N1 reference point operate between the UE and the AMF, and how does the NAS protocol transport both 5GMM and 5GSM messages over N1?",
+    "expected_sections": [
+      { "specification": "TS 23.501", "section": "4.2.2" },
+      { "specification": "TS 24.501", "section": "4.1" }
+    ],
+    "key_facts": [
+      "N1 is the reference point between the UE and the AMF",
+      "5GMM handles mobility/connection management directly with AMF, while 5GSM messages are transported via 5GMM NAS TRANSPORT messages between UE and AMF (and forwarded to SMF)"
+    ],
+    "reference_answer": "N1 is the control-plane reference point between the UE and the AMF. Over N1, 5GMM procedures terminate at the AMF, whereas 5GSM session management messages are encapsulated inside 5GMM UL/DL NAS TRANSPORT messages."
+  },
+  {
+    "id": "Q31",
+    "category": "out_of_corpus",
+    "question": "What are the physical layer PRACH preamble formats and subcarrier spacings defined for 5G NR radio access?",
+    "expected_sections": [],
+    "key_facts": [],
+    "reference_answer": "I could not find this information in the documents"
+  },
+  {
+    "id": "Q32",
+    "category": "out_of_corpus",
+    "question": "What are the maximum channel bandwidths and Multi-Link Operation (MLO) modes introduced in Wi-Fi 7 (IEEE 802.11be)?",
+    "expected_sections": [],
+    "key_facts": [],
+    "reference_answer": "I could not find this information in the documents"
+  },
+  {
+    "id": "Q33",
+    "category": "out_of_corpus",
+    "question": "Which country won the FIFA World Cup in 2022 and what was the final score?",
+    "expected_sections": [],
+    "key_facts": [],
+    "reference_answer": "I could not find this information in the documents"
+  }
+]

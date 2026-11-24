@@ -1,0 +1,23 @@
+# Paramètres modifiables sans toucher au code
+corpus:
+  specs:
+    - {name: "TS 23.501", release: "Rel-18", version: "V18.12.0"}
+    - {name: "TS 24.501", release: "Rel-18", version: "V18.14.0"}
+
+chunking:
+  max_tokens: 400
+  overlap_tokens: 40
+
+embedding:
+  model: "BAAI/bge-base-en-v1.5"   # à comparer avec d'autres modèles
+
+retrieval:
+  top_k_candidates: 30
+  top_k_final: 5
+  use_hybrid: true
+  use_reranker: true
+  use_routing: true
+  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+
+generation:
+  refusal_message: "I could not find this information in the documents"

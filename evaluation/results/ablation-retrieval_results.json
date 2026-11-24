@@ -1,0 +1,32 @@
+[
+  {
+    "Architecture": "0. Baseline (Pipeline Complet)",
+    "Recall@15": 0.7333333333333333,
+    "MRR": 0.6391414141414142,
+    "Latence": 1.5771844228108725
+  },
+  {
+    "Architecture": "1. Ablation Routeur (Sans Routeur)",
+    "Recall@15": 0.8166666666666667,
+    "MRR": 0.6252525252525253,
+    "Latence": 1.4946643511454265
+  },
+  {
+    "Architecture": "2. Ablation Reranker (Sans Reranker)",
+    "Recall@15": 0.7333333333333333,
+    "MRR": 0.5453703703703703,
+    "Latence": 0.18727145195007325
+  },
+  {
+    "Architecture": "3. Ablation Hybride (Vectoriel seul)",
+    "Recall@15": 0.7333333333333333,
+    "MRR": 0.6391414141414142,
+    "Latence": 1.526280148824056
+  },
+  {
+    "Architecture": "4. Ablation Hybride (Lexical seul)",
+    "Recall@15": 0.65,
+    "MRR": 0.5913636363636364,
+    "Latence": 1.5338279406229656
+  }
+]
