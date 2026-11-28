@@ -13,10 +13,6 @@ _ACCENTS = re.compile(r"[àâäçéèêëîïôöùûüÿœæ]", re.I)
 _ARABIC = re.compile(r"[\u0600-\u06FF]")
 _FOLLOW_UP = re.compile(r"\b(it|its|that|this|those|these|them|they|their|also|too|same|other|previous|above|"
                         r"and what about|how about|what about|and for)\b", re.I)
-_SMALLTALK = re.compile(
-    r"^\s*(hi|hello|hey|hola|yo|bonjour|salut|bonsoir|good (morning|afternoon|evening)|thanks?( you)?|merci|"
-    r"who are you|what are you|what can you do|help|qui es[- ]tu|ça va|how are you)\b[\s!?.]*$", re.I)
-
 ACRONYMS = {
     "amf": "Access and Mobility Management Function", "smf": "Session Management Function",
     "upf": "User Plane Function", "udm": "Unified Data Management", "ausf": "Authentication Server Function",
@@ -44,8 +40,47 @@ def detect_language(text: str) -> str:
     return "en"
 
 
+_PLEASANTRIES = [   # checked in this order
+    ("thanks", r"(thanks?|thank you|thank u|thx|ty|merci|shukran|cheers|appreciated?|many thanks|grateful|great job|good job|well done|nice work|bravo)"),
+    ("bye", r"(bye|goodbye|see you|see ya|good night|au revoir|à bientôt|a bientot|bonne soirée|later)"),
+    ("greeting", r"(hi|hello|hey|hola|yo|bonjour|salut|bonsoir|good (morning|afternoon|evening)|how are you|ça va|comment ça va)"),
+    ("ack", r"(ok|okay|cool|nice|great|awesome|perfect|got it|i see|understood|makes sense|alright|sounds good|super|parfait|d'accord|compris|excellent|wow)"),
+]
+_IDENTITY = re.compile(r"^(who are you|what are you|what can you do|what do you do|help|help me|how do you work|qui es[- ]tu|que peux[- ]tu faire)$")
+_REQUEST = re.compile(r"\b(what|how|why|when|which|where|who|explain|describe|tell|show|list|give|compare|summari[sz]e|detail|more|elaborate|continue|can you|could you|please|quel|quelle|quels|quelles|comment|pourquoi|quand|qui|que|dis|explique|décris)\b")
+_TECH = re.compile(r"\d|\b(5g|3gpp|spec|specs|nas|ts|" + "|".join(re.escape(k) for k in ACRONYMS) + r")\b")
+
+REPLIES = {
+    "greeting": "Hi, I’m ChatGPP. Ask me anything about the 3GPP 5G specifications (TS 23.501, TS 24.501, TS 23.502, TS 33.501) and I’ll answer with citations.",
+    "thanks": "You’re welcome! Ask me another question about the 5G specifications whenever you like.",
+    "ack": "Glad that helps. What would you like to look up next?",
+    "bye": "Goodbye! Come back any time you have a question about the 5G specifications.",
+    "identity": "I’m ChatGPP. I answer questions about the 3GPP 5G specifications (TS 23.501, 24.501, 23.502 and 33.501) using only the documents, and I cite the section for every claim. I can also compare Release 17 and 18, and you can ask in English or French.",
+}
+
+
+def smalltalk_kind(text: str) -> str | None:
+    """greeting | thanks | ack | bye | identity | None. Never fires on a real question."""
+    t = " ".join(re.sub(r"[^\w\s'’àâçéèêëîïôûùü-]", " ", text.lower()).split())
+    if not t:
+        return None
+    if _IDENTITY.match(t):
+        return "identity"
+    if len(t.split()) > 8 or "?" in text or _REQUEST.search(t) or _TECH.search(t):
+        return None
+    for kind, pat in _PLEASANTRIES:
+        if re.search(rf"\b{pat}\b", t):
+            return kind
+    return None
+
+
+def smalltalk_reply(text: str) -> str | None:
+    kind = smalltalk_kind(text)
+    return REPLIES[kind] if kind else None
+
+
 def is_smalltalk(text: str) -> bool:
-    return bool(_SMALLTALK.match(text))
+    return smalltalk_kind(text) is not None
 
 
 def expand_acronyms(query: str) -> str:
@@ -73,7 +108,9 @@ REWRITE_SYSTEM = (
     "3. If chat history is given and the message depends on it (pronouns, ellipsis), make it fully standalone.\n"
     "4. Keep acronyms (AMF, SMF, 5GMM...), timers (T3510), cause numbers, message/IE names, release numbers "
     "and specification numbers EXACTLY as written.\n"
-    "5. Do not answer the question and do not add facts."
+    "5. Do not answer the question and do not add facts.\n"
+    "6. NEVER add a specification number (TS xx.xxx), release or topic that the user did not write. "
+    "If the message is not a question or request about 5G (thanks, greeting, acknowledgement), output it unchanged."
 )
 
 
@@ -86,7 +123,8 @@ class QueryProcessor:
         lang = detect_language(query)
         if lang != "en":
             return True, lang
-        if history and (len(query.split()) <= 12 or _FOLLOW_UP.search(query)):
+        looks_like_request = "?" in query or bool(_REQUEST.search(query.lower()))
+        if history and looks_like_request and (len(query.split()) <= 12 or _FOLLOW_UP.search(query)):
             return True, lang
         return False, lang
 
@@ -121,4 +159,10 @@ class QueryProcessor:
             return query
         text = re.sub(r"^(standalone question|question|english|translation)\s*:\s*", "", lines[0], flags=re.I)
         text = text.strip().strip('"“”\'')
-        return text if 3 <= len(text) <= 600 else query
+        if not 3 <= len(text) <= 600:
+            return query
+        known = (query + " " + " ".join(h["content"] for h in (history or []))).replace(" ", "")
+        for num in set(re.findall(r"\b\d{2}\.\d{3}\b", text)):
+            if num not in known:   # the LLM invented a spec number: strip it, it would hard-filter retrieval
+                text = re.sub(rf"(?:,?\s*(?:as\s+)?(?:described|specified|defined)?\s*in\s+)?TS\s*{re.escape(num)}", "", text)
+        return " ".join(text.split()) or query

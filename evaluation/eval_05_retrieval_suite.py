@@ -111,7 +111,18 @@ def run_config(retriever, name, conf, default_ds, args, translator):
     pool = conf.pop("candidate_pool", args.pool)
     items = [q for q in load_dataset(ds_path) if q.get("expected_sections") and (not cats or q["category"] in cats)]
     rec, mrr, full, lat, by_cat = [], [], [], [], defaultdict(list)
-    for it in items:
+    # Which expected sections can this configuration possibly reach? (spec in scope AND that release indexed)
+    scope = conf.get("specs") or retriever.specs
+    indexed = {(d["specification"], d["release"]) for d in retriever.corpus_info()}
+    default_rel = retriever.default_release
+    exp_all = [e for it in items for e in it["expected_sections"]]
+    unreachable = [e for e in exp_all if (scope and e["specification"] not in scope)
+                   or (e["specification"], str(e.get("release") or default_rel)) not in indexed]
+    if unreachable:
+        print(f"  WARNING '{name}': {len(unreachable)}/{len(exp_all)} expected sections are unreachable "
+              f"(spec outside the search scope, or that release/spec is not indexed) -> low recall is expected. "
+              f"e.g. {unreachable[0]}")
+    for n_done, it in enumerate(items):
         q = question_of(it)
         route_q, dense, lex = q, q, q
         if translate:
@@ -122,9 +133,14 @@ def run_config(retriever, name, conf, default_ds, args, translator):
         lat.append(time.perf_counter() - t)
         r, m = retrieval_metrics(out["results"], it["expected_sections"])
         rec.append(r), mrr.append(m), full.append(r == 1.0), by_cat[it["category"]].append(r)
+        if args.debug and n_done < args.debug:
+            got = [f"{c['metadata']['specification'][3:]} R{c['metadata']['release']} §{c['metadata']['section']}" for c in out["results"][:6]]
+            print(f"    [{it['id']}] expected={[(e['specification'][3:], e.get('release'), e['section']) for e in it['expected_sections']]}"
+                  f"\n          got(top6)={got}  recall={r:.2f}")
     n = max(len(items), 1)
     return {"Configuration": name, "N": len(items), f"Recall@{top_k}": f"{sum(rec)/n:.3f}",
             "Full hit": f"{sum(full)/n:.3f}", "MRR": f"{sum(mrr)/n:.3f}", "Latency (s)": f"{sum(lat)/n:.2f}",
+            "Unreachable": f"{len(unreachable)}/{len(exp_all)}",
             "By category": ", ".join(f"{c}={sum(v)/len(v):.2f}" for c, v in sorted(by_cat.items()))}
 
 
@@ -134,12 +150,24 @@ def main():
     ap.add_argument("--dataset", default=str(CORE))
     ap.add_argument("--k", type=int, default=cfg("retrieval")["top_k"])
     ap.add_argument("--pool", type=int, default=cfg("retrieval")["candidate_pool"])
+    ap.add_argument("--debug", type=int, default=0, help="print expected vs retrieved sections for the first N questions")
     ap.add_argument("--llm", default=cfg("generation")["default_llm"], help="LLM used to translate French questions")
     args = ap.parse_args()
 
     from src.retrieval.hybrid import HybridRetriever
     retriever = HybridRetriever()
     translator = Translator(args.llm)
+
+    # Preflight: refuse to produce a table of zeros when the index cannot answer the questions.
+    info = retriever.corpus_info()
+    print("Indexed corpus:")
+    for d in info:
+        print(f"  {d['specification']} Rel-{d['release']} {d['version']}: {d['chunks']} chunks")
+    indexed = {(d["specification"], d["release"]) for d in info}
+    missing = [sp for sp in BASE_SPECS if (sp, retriever.default_release) not in indexed]
+    if missing:
+        sys.exit(f"\nERROR: no chunks for {missing} in Release {retriever.default_release!r}. "
+                 f"Run: python evaluation/tools/inspect_index.py  (then python -m src.corpus, parser, chunker, build_index)")
     RESULTS_DIR.mkdir(parents=True, exist_ok=True)
 
     for suite in (SUITES if args.suite == "all" else [args.suite]):
@@ -155,7 +183,7 @@ def main():
             print(f"  {name}: recall={row[[k for k in row if k.startswith('Recall')][0]]} mrr={row['MRR']}")
         if rows:
             rcol = [k for k in rows[0] if k.startswith("Recall")][0]
-            cols = ["Configuration", "N", rcol, "Full hit", "MRR", "Latency (s)", "By category"]
+            cols = ["Configuration", "N", rcol, "Full hit", "MRR", "Latency (s)", "Unreachable", "By category"]
             table = md_table(rows, cols)
             print("\n" + table)
             (RESULTS_DIR / f"eval_05_{suite}.json").write_text(json.dumps(rows, indent=2), encoding="utf-8")

@@ -41,3 +41,21 @@ def test_llm_failure_never_breaks_the_query():
 def test_helpers():
     assert is_smalltalk("hello!") and not is_smalltalk("hello what is the AMF")
     assert "Access and Mobility" in expand_acronyms("role of the AMF")
+
+
+def test_pleasantries_never_reach_retrieval():
+    from src.retrieval.query_processor import smalltalk_kind
+    assert smalltalk_kind("Thank you.") == "thanks" and smalltalk_kind("Merci beaucoup") == "thanks"
+    assert smalltalk_kind("Appreciated") == "thanks" and smalltalk_kind("hello!") == "greeting"
+    assert smalltalk_kind("who are you?") == "identity"
+    for real in ["hello what is the AMF", "ok explain registration", "help with registration",
+                 "and T3511?", "thanks, now what is T3510"]:
+        assert smalltalk_kind(real) is None
+
+
+def test_rewriter_cannot_invent_a_spec_number():
+    class Liar:
+        def generate(self, *a, **k):
+            return "What NAS messages are exchanged during registration as described in TS 23.502?"
+    out = QueryProcessor._rewrite(Liar(), "and the NAS messages?", [{"role": "user", "content": "registration"}])
+    assert "23.502" not in out

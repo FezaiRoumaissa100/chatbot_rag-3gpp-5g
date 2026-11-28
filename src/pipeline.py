@@ -13,11 +13,7 @@ from src.generation.generator import RAGGenerator
 from src.generation.llm import LLMError, get_llm
 from src.generation.prompt import REFUSAL_MESSAGE
 from src.retrieval.hybrid import HybridRetriever
-from src.retrieval.query_processor import QueryProcessor, is_smalltalk
-
-SMALLTALK_REPLY = ("Hi, I’m ChatGPP. Ask me anything about the 3GPP 5G specifications "
-                   "(TS 23.501, TS 24.501, TS 23.502, TS 33.501) and I’ll answer with citations.")
-
+from src.retrieval.query_processor import QueryProcessor, smalltalk_reply
 
 def parse_release(release: str | None) -> tuple[list[str] | None, bool | None]:
     """UI selector -> (releases, compare). 'auto' lets the router decide."""
@@ -71,8 +67,9 @@ class RAGPipeline:
 
     def run(self, query: str, top_k: int | None = None, history=None, llm: str | None = None,
             release: str | None = None) -> dict:
-        if is_smalltalk(query):
-            return {"query": query, "english_query": query, "language": "en", "answer": SMALLTALK_REPLY,
+        reply = smalltalk_reply(query)
+        if reply:
+            return {"query": query, "english_query": query, "language": "en", "answer": reply,
                     "routing": None, "sources": [], "citations": validate_citations("", []),
                     "latency_ms": {"processing": 0, "retrieval": 0, "generation": 0, "total": 0},
                     "llm": None, "refused": False}
@@ -88,11 +85,12 @@ class RAGPipeline:
     def stream(self, query: str, top_k: int | None = None, history=None, llm: str | None = None,
                release: str | None = None):
         """Yields {'event': meta|sources|token|done, 'data': ...} dicts (SSE-ready)."""
-        if is_smalltalk(query):
+        reply = smalltalk_reply(query)
+        if reply:
             yield {"event": "meta", "data": {"routing": None, "language": "en", "english_query": query,
                                              "rewritten": False, "llm": None}}
             yield {"event": "sources", "data": []}
-            yield {"event": "token", "data": SMALLTALK_REPLY}
+            yield {"event": "token", "data": reply}
             yield {"event": "done", "data": {"citations": validate_citations("", []), "refused": False,
                                               "latency_ms": {"total": 0}, "llm": None}}
             return

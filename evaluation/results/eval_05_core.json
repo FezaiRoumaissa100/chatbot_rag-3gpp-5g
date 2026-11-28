@@ -2,73 +2,81 @@
   {
     "Configuration": "Full pipeline (soft routing + coverage)",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.53",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.783",
+    "Full hit": "0.700",
+    "MRR": "0.628",
+    "Latency (s)": "0.65",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.55, single_23501=0.90, single_24501=0.90"
   },
   {
     "Configuration": "Hard routing (legacy)",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.05",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.767",
+    "Full hit": "0.667",
+    "MRR": "0.653",
+    "Latency (s)": "0.16",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.50, single_23501=0.90, single_24501=0.90"
   },
   {
     "Configuration": "No routing",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.03",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.800",
+    "Full hit": "0.733",
+    "MRR": "0.628",
+    "Latency (s)": "0.16",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.60, single_23501=0.90, single_24501=0.90"
   },
   {
     "Configuration": "No reranker",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.03",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.833",
+    "Full hit": "0.767",
+    "MRR": "0.688",
+    "Latency (s)": "0.07",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.60, single_23501=0.90, single_24501=1.00"
   },
   {
     "Configuration": "Vector only",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.02",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.800",
+    "Full hit": "0.733",
+    "MRR": "0.628",
+    "Latency (s)": "0.15",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.60, single_23501=0.90, single_24501=0.90"
   },
   {
     "Configuration": "BM25 only",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.01",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.733",
+    "Full hit": "0.633",
+    "MRR": "0.598",
+    "Latency (s)": "0.12",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.50, single_23501=0.90, single_24501=0.80"
   },
   {
     "Configuration": "No coverage guarantee",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.03",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.783",
+    "Full hit": "0.700",
+    "MRR": "0.628",
+    "Latency (s)": "0.17",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.55, single_23501=0.90, single_24501=0.90"
   },
   {
     "Configuration": "Candidate pool = 15 (legacy)",
     "N": 30,
-    "Recall@15": "0.000",
-    "Full hit": "0.000",
-    "MRR": "0.000",
-    "Latency (s)": "0.03",
-    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+    "Recall@15": "0.800",
+    "Full hit": "0.733",
+    "MRR": "0.625",
+    "Latency (s)": "0.11",
+    "Unreachable": "0/40",
+    "By category": "cross_spec=0.60, single_23501=0.90, single_24501=0.90"
   }
 ]
