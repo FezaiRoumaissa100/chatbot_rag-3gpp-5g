@@ -1,56 +1,40 @@
-import os
-from pathlib import Path
-from dotenv import load_dotenv
-from google import genai
-from google.genai import types
+from typing import Iterator
 
-from src.generation.prompt import REFUSAL_MESSAGE, SYSTEM_PROMPT, format_context
-
-PROJECT_ROOT = Path(__file__).resolve().parents[2]
-load_dotenv(PROJECT_ROOT / ".env")
+from src.generation.llm import BaseLLM, get_llm
+from src.generation.prompt import REFUSAL_MESSAGE, build_system_prompt, format_context
 
 
-class GeminiGenerator:
-    """Generates grounded, cited answers from 3GPP chunks using Gemini Flash."""
+class RAGGenerator:
+    """Builds the grounded prompt and calls any LLM provider (Gemini API or local Ollama)."""
 
-    def __init__(
-        self,
-        model_name: str = "gemini-3.5-flash",
-        temperature: float = 0.0,
-        min_rerank_score: float = -4.0,
-    ):
-        api_key = os.getenv("LLM_API_KEY") or os.getenv("GEMINI_API_KEY")
-        if not api_key:
-            raise ValueError(
-                "Missing API key: please set LLM_API_KEY in your .env file."
-            )
-
-        self.model_name = model_name
+    def __init__(self, llm: BaseLLM | str | None = None, temperature: float = 0.0):
+        self.llm = llm if isinstance(llm, BaseLLM) else get_llm(llm)
         self.temperature = temperature
-        self.min_rerank_score = min_rerank_score
-        self.client = genai.Client(api_key=api_key)
 
-    def generate(self, query: str, chunks: list[dict]) -> str:
+    def build(self, query: str, chunks: list[dict], compare: bool = False) -> tuple[str, str]:
+        releases = {str(c["metadata"].get("release", "")) for c in chunks}
+        system = build_system_prompt(multi_release=len(releases) > 1, compare=compare)
+        user = (f"3GPP NORMATIVE CONTEXT:\n{format_context(chunks)}\n\n"
+                f"USER QUESTION:\n{query}\n\n"
+                f"ANSWER (English, strictly grounded, with [Spec, Section] citations):")
+        return system, user
+
+    def generate(self, query: str, chunks: list[dict], compare: bool = False) -> str:
         if not chunks:
             return REFUSAL_MESSAGE
+        system, user = self.build(query, chunks, compare)
+        return self.llm.generate(system, user, self.temperature) or REFUSAL_MESSAGE
 
-        context_text = format_context(chunks)
-        user_prompt = (
-            f"3GPP NORMATIVE CONTEXT:\n"
-            f"{context_text}\n\n"
-            f"USER QUESTION:\n"
-            f"{query}\n\n"
-            f"ANSWER (in English, strictly grounded with [Spec, Section] citations):"
-        )
+    def stream(self, query: str, chunks: list[dict], compare: bool = False) -> Iterator[str]:
+        if not chunks:
+            yield REFUSAL_MESSAGE
+            return
+        system, user = self.build(query, chunks, compare)
+        yield from self.llm.stream(system, user, self.temperature)
 
-        response = self.client.models.generate_content(
-            model=self.model_name,
-            contents=user_prompt,
-            config=types.GenerateContentConfig(
-                system_instruction=SYSTEM_PROMPT,
-                temperature=self.temperature,
-            ),
-        )
 
-        answer = (response.text or "").strip()
-        return answer if answer else REFUSAL_MESSAGE
+class GeminiGenerator(RAGGenerator):
+    """Backward-compatible alias used by older scripts/tests."""
+
+    def __init__(self, model_name: str = "gemini-3.5-flash-lite", temperature: float = 0.0, **_):
+        super().__init__(f"gemini:{model_name}", temperature)

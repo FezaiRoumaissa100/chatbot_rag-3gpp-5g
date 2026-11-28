@@ -1,0 +1,29 @@
+[
+  {
+    "Configuration": "reranker = minilm",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "reranker = bge-base",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.26",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "reranker = bge-m3",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.25",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  }
+]

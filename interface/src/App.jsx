@@ -1,170 +1,179 @@
-import { useEffect, useRef, useState } from 'react'
-import ReactMarkdown from 'react-markdown'
-import './App.css'
+import { useCallback, useEffect, useRef, useState } from 'react'
+import Hero from './components/Hero.jsx'
+import Message from './components/Message.jsx'
+import Composer from './components/Composer.jsx'
+import TopBar from './components/TopBar.jsx'
+import { Inspector } from './components/Sources.jsx'
+import { cleanError, fetchCorpus, fetchHealth, fetchModels, streamChat } from './lib/api.js'
 
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+const uid = () => Math.random().toString(36).slice(2, 10)
+const STORE = 'chatgpp.settings.v2'
 
-function RobotIcon({ size = 28 }) {
-  return (
-    <svg
-      width={size}
-      height={size}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth="1.8"
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      aria-hidden="true"
-    >
-      <rect x="4" y="8" width="16" height="12" rx="3" />
-      <path d="M12 8V4" />
-      <circle cx="12" cy="3" r="1" />
-      <circle cx="9" cy="13" r="0.5" fill="currentColor" />
-      <circle cx="15" cy="13" r="0.5" fill="currentColor" />
-      <path d="M9 17h6" />
-      <path d="M2 13v3" />
-      <path d="M22 13v3" />
-    </svg>
-  )
+function useSettings() {
+  const [s, setS] = useState(() => {
+    try { return { llm: 'gemini:gemini-3.5-flash-lite', release: 'auto', theme: 'dark', ...JSON.parse(localStorage.getItem(STORE) || '{}') } }
+    catch { return { llm: 'gemini:gemini-3.5-flash-lite', release: 'auto', theme: 'dark' } }
+  })
+  useEffect(() => {
+    document.documentElement.dataset.theme = s.theme
+    try { localStorage.setItem(STORE, JSON.stringify(s)) } catch { /* private mode */ }
+  }, [s])
+  return [s, (patch) => setS((p) => ({ ...p, ...patch }))]
 }
 
 export default function App() {
+  const [settings, update] = useSettings()
   const [messages, setMessages] = useState([])
   const [input, setInput] = useState('')
-  const [loading, setLoading] = useState(false)
-  const bottomRef = useRef(null)
+  const [busy, setBusy] = useState(false)
+  const [health, setHealth] = useState('connecting')
+  const [models, setModels] = useState(null)
+  const [corpus, setCorpus] = useState(null)
+  const [inspect, setInspect] = useState(null) // { msgId, index }
 
-  const hasMessages = messages.length > 0 || loading
+  const abortRef = useRef(null)
+  const scrollRef = useRef(null)
+  const stick = useRef(true)
 
+  // ---- backend status -------------------------------------------------
   useEffect(() => {
-    bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages, loading])
+    let alive = true
+    let timer
+    const tick = async () => {
+      try {
+        const h = await fetchHealth()
+        if (!alive) return
+        if (h.ready) {
+          setHealth('ready')
+          fetchModels().then((m) => alive && setModels(m)).catch(() => {})
+          fetchCorpus().then((c) => alive && setCorpus(c)).catch(() => {})
+          return
+        }
+        setHealth('warming')
+      } catch { if (alive) setHealth('offline') }
+      timer = setTimeout(tick, 2500)
+    }
+    tick()
+    return () => { alive = false; clearTimeout(timer) }
+  }, [])
 
-  async function sendMessage(e) {
-    e?.preventDefault()
-    const query = input.trim()
-    if (!query || loading) return
+  // pointer-following highlight on glass surfaces
+  useEffect(() => {
+    const move = (e) => {
+      const el = e.target.closest?.('.glow')
+      if (!el) return
+      const r = el.getBoundingClientRect()
+      el.style.setProperty('--mx', `${e.clientX - r.left}px`)
+      el.style.setProperty('--my', `${e.clientY - r.top}px`)
+    }
+    document.addEventListener('pointermove', move, { passive: true })
+    return () => document.removeEventListener('pointermove', move)
+  }, [])
 
+  // keep the view pinned to the bottom while streaming, unless the reader scrolled up
+  useEffect(() => {
+    const el = scrollRef.current
+    if (el && stick.current) el.scrollTop = el.scrollHeight
+  }, [messages])
+
+  const onScroll = () => {
+    const el = scrollRef.current
+    stick.current = el.scrollHeight - el.scrollTop - el.clientHeight < 140
+  }
+
+  const patch = useCallback((id, fn) => {
+    setMessages((ms) => ms.map((m) => (m.id === id ? { ...m, ...fn(m) } : m)))
+  }, [])
+
+  const send = useCallback(async (text) => {
+    const query = (text ?? input).trim()
+    if (!query || busy) return
     setInput('')
-    setMessages((prev) => [...prev, { role: 'user', text: query }])
-    setLoading(true)
+    setBusy(true)
+    stick.current = true
 
+    const history = messages
+      .filter((m) => m.text && m.status !== 'error')
+      .slice(-6)
+      .map((m) => ({ role: m.role, content: m.text.slice(0, 1200) }))
+    const aid = uid()
+    setMessages((ms) => [
+      ...ms,
+      { id: uid(), role: 'user', text: query },
+      { id: aid, role: 'assistant', text: '', status: 'streaming', stage: 'analyzing', sources: [], meta: null, done: null },
+    ])
+
+    // tokens arrive faster than React should render: flush ~25 times a second
+    let buffer = ''
+    let timer = null
+    const flush = () => {
+      timer = null
+      if (!buffer) return
+      const chunk = buffer
+      buffer = ''
+      patch(aid, (m) => ({ text: m.text + chunk, stage: 'writing' }))
+    }
+
+    const controller = new AbortController()
+    abortRef.current = controller
     try {
-      const res = await fetch(`${API_URL}/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ query }),
-      })
-      if (!res.ok) {
-        const detail = await res.json().catch(() => ({}))
-        throw new Error(detail.detail || `HTTP ${res.status}`)
-      }
-      const data = await res.json()
-      setMessages((prev) => [
-        ...prev,
-        {
-          role: 'assistant',
-          text: data.answer,
-          sources: data.sources,
-          routing: data.routing,
-          latency_ms: data.latency_ms,
+      await streamChat({
+        query, history, llm: settings.llm, release: settings.release, signal: controller.signal,
+        onEvent: (ev, data) => {
+          if (ev === 'meta') patch(aid, () => ({ meta: data }))
+          else if (ev === 'sources') patch(aid, () => ({ sources: data, stage: 'reading' }))
+          else if (ev === 'token') { buffer += data; if (!timer) timer = setTimeout(flush, 40) }
+          else if (ev === 'done') { clearTimeout(timer); flush(); patch(aid, () => ({ done: data, status: 'done', stage: 'done' })) }
+          else if (ev === 'error') { clearTimeout(timer); flush(); patch(aid, () => ({ status: 'error', error: cleanError(`${data.code}: ${data.detail}`) })) }
         },
-      ])
-    } catch (err) {
-      const raw = err.message || ''
-      const msg = raw.includes('fetch')
-        ? 'Unable to reach the server. Please check that the backend is running and try again.'
-        : raw.replace(/^[A-Z_]+:\s*/, '') || 'Something went wrong. Please try again.'
-      setMessages((prev) => [
-        ...prev,
-        { role: 'assistant', text: msg, error: true },
-      ])
+      })
+    } catch (e) {
+      clearTimeout(timer)
+      flush()
+      if (e.name === 'AbortError') patch(aid, () => ({ status: 'stopped' }))
+      else patch(aid, () => ({ status: 'error', error: e.message }))
     } finally {
-      setLoading(false)
+      patch(aid, (m) => (m.status === 'streaming' ? { status: 'done' } : {}))
+      abortRef.current = null
+      setBusy(false)
     }
-  }
+  }, [input, busy, messages, settings.llm, settings.release, patch])
 
-  function onKeyDown(e) {
-    if (e.key === 'Enter' && !e.shiftKey) {
-      e.preventDefault()
-      sendMessage()
-    }
-  }
+  const stop = () => abortRef.current?.abort()
+  const reset = () => { abortRef.current?.abort(); setMessages([]); setInspect(null) }
+
+  const openSource = useCallback((msgId, index) => setInspect({ msgId, index }), [])
+  const inspectMsg = inspect && messages.find((m) => m.id === inspect.msgId)
+  const sources = inspectMsg?.sources || []
+  const step = (d) => setInspect((cur) => cur && { ...cur, index: (cur.index + d + sources.length) % sources.length })
+
+  const empty = messages.length === 0
 
   return (
     <div className="app">
-      <header className="header">
-        <div className="header-icon">
-          <RobotIcon size={26} />
-        </div>
-        <div>
-          <div className="header-title">ChatGPP</div>
-          <div className="header-subtitle">
-            TS 23.501 · TS 24.501 — Release 18
-          </div>
-        </div>
-      </header>
+      <div className="aurora" aria-hidden="true"><i className="a1" /><i className="a2" /><i className="a3" /><i className="grid" /></div>
 
-      <main className={`chat-area ${hasMessages ? '' : 'centered'}`}>
+      <TopBar settings={settings} update={update} models={models} corpus={corpus} health={health}
+        canReset={!empty} onReset={reset} />
 
-        {messages.map((msg, i) => (
-          <div key={i} className={`message ${msg.role}`}>
-            {msg.role === 'assistant' && (
-              <div className="avatar assistant">
-                <RobotIcon size={18} />
-              </div>
-            )}
-            <div className="message-content">
-              {msg.role === 'user' ? (
-                <div>{msg.text}</div>
-              ) : (
-                <div className="answer-text">
-                  <ReactMarkdown>{msg.text}</ReactMarkdown>
-                </div>
-              )}
-            </div>
-          </div>
-        ))}
-
-        {loading && (
-          <div className="message assistant">
-            <div className="avatar assistant">
-              <RobotIcon size={18} />
-            </div>
-            <div className="message-content">
-              <div className="typing">
-                <span></span>
-                <span></span>
-                <span></span>
-              </div>
-            </div>
+      <main className="scroller" ref={scrollRef} onScroll={onScroll}>
+        {empty ? (
+          <Hero corpus={corpus} onPick={(q) => send(q)} />
+        ) : (
+          <div className="thread">
+            {messages.map((m) => (
+              <Message key={m.id} msg={m} onOpenSource={openSource}
+                activeSource={inspect?.msgId === m.id ? inspect.index : null} />
+            ))}
           </div>
         )}
-        <div ref={bottomRef} />
       </main>
 
-      <footer className={`input-area ${hasMessages ? '' : 'centered'}`}>
-        <form className="input-wrapper" onSubmit={sendMessage}>
-          <textarea
-            className="chat-input"
-            placeholder="Ask a question about 5G (e.g. What is the role of the AMF?)"
-            value={input}
-            onChange={(e) => setInput(e.target.value)}
-            onKeyDown={onKeyDown}
-            rows={1}
-            disabled={loading}
-          />
-          <button
-            className="send-button"
-            type="submit"
-            disabled={loading || !input.trim()}
-            aria-label="Send"
-          >
-            ↑
-          </button>
-        </form>
-      </footer>
+      <Composer value={input} onChange={setInput} onSend={() => send()} onStop={stop} busy={busy}
+        disabled={health === 'offline'} />
+
+      <Inspector sources={sources} index={inspectMsg ? inspect.index : null}
+        onClose={() => setInspect(null)} onStep={step} />
     </div>
   )
 }

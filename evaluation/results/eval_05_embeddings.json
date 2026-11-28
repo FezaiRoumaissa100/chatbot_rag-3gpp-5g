@@ -1,0 +1,56 @@
+[
+  {
+    "Configuration": "bge-base | hybrid",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "bge-base | vector only",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.02",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "bge-m3 | hybrid",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.39",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "bge-m3 | vector only",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.02",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "e5-base | hybrid",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.24",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "e5-base | vector only",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.02",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  }
+]

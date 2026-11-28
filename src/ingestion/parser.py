@@ -1,175 +1,107 @@
 import json
 import re
+import sys
 from pathlib import Path
-from docx import Document
-from docx.text.paragraph import Paragraph
-from docx.table import Table
-from docx.oxml.text.paragraph import CT_P
-from docx.oxml.table import CT_Tbl
 
-# ============================================================
-# 1. PATH CONFIGURATION
-# ============================================================
+from docx import Document
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
+from docx.table import Table
+from docx.text.paragraph import Paragraph
 
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-RAW_DIR = PROJECT_ROOT / "data" / "raw"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
+
+from src.corpus import discover_specs, write_manifest
+
 PROCESSED_DIR = PROJECT_ROOT / "data" / "processed"
 PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
 
+SECTION_RE = re.compile(r'^(\d+(?:\.\d+)*[a-zA-Z]?)\s+(.*)')
 
-# ============================================================
-# 2. PARSING FUNCTION
-# ============================================================
 
-def parse_3gpp_document(file_path: Path, specification: str, release: str) -> list[dict]:
-    """
-    Parses a 3GPP Word (.docx) specification sequentially, ignoring cover pages,
-    Table of Contents, and Change History annexes, while extracting section metadata.
-    """
-    print(f"\nParsing {specification}...")
+def table_to_text(table: Table) -> str:
+    """Rows joined with ' | '. Horizontally merged cells are emitted once."""
+    rows = []
+    for row in table.rows:
+        cells, prev = [], None
+        for cell in row.cells:
+            if prev is not None and cell._tc is prev:
+                continue
+            prev = cell._tc
+            cells.append(cell.text.strip().replace("\n", " "))
+        rows.append(" | ".join(cells))
+    return "\n".join(rows)
 
-    if not file_path.exists():
-        raise FileNotFoundError(f"File not found: {file_path}")
 
+def parse_3gpp_document(file_path: Path, specification: str, release: str, version: str) -> list[dict]:
+    """Parses a 3GPP .docx sequentially (skips cover, TOC and change history)."""
+    print(f"\nParsing {specification} Rel-{release} ({version})...")
     doc = Document(file_path)
-    body = doc.element.body
+    blocks, capture, heading_stack = [], False, {}
+    current_section = current_title = ""
 
-    blocks = []
-    capture_started = False
-    heading_stack = {}
-    current_section = ""
-    current_title = ""
+    def base(kind: str, text: str, style: str = "") -> dict:
+        path = " > ".join(heading_stack[l] for l in sorted(heading_stack))
+        d = {"type": kind, "text": text, "specification": specification, "release": release,
+             "version": version, "section": current_section, "title": current_title, "hierarchy": path}
+        if style:
+            d["style"] = style
+        return d
 
-    # Matches numbered sections like "4.2.1", "4.2.5a", "4.8.4A" followed by title
-    section_pattern = re.compile(r'^(\d+(?:\.\d+)*[a-zA-Z]?)\s+(.*)')
-
-    for element in body.iterchildren():
-
-        # ----------------------------------------------------
-        # CASE 1: PARAGRAPH
-        # ----------------------------------------------------
+    for element in doc.element.body.iterchildren():
         if isinstance(element, CT_P):
-            paragraph = Paragraph(element, doc)
-            text = paragraph.text.strip()
-
+            p = Paragraph(element, doc)
+            text = p.text.strip()
             if not text:
                 continue
-
-            style_name = paragraph.style.name if paragraph.style else ""
-
-            # Start capturing at the first real Heading 1 ("Foreword")
-            if style_name == "Heading 1" and "Foreword" in text:
-                capture_started = True
-
-            if not capture_started:
+            style = p.style.name if p.style else ""
+            if style == "Heading 1" and "Foreword" in text:
+                capture = True
+            if not capture:
                 continue
-
-            # Stop capturing when reaching the administrative Change History annex
-            if style_name == "Heading 1" and "Change history" in text:
+            if style == "Heading 1" and "Change history" in text:
                 break
-
-            # Detect Heading 1 to Heading 5
-            if style_name.startswith("Heading"):
+            if style.startswith("Heading"):
                 try:
-                    level = int(style_name.replace("Heading", "").strip())
+                    level = int(style.replace("Heading", "").strip())
                 except ValueError:
                     level = None
-
                 if level is not None:
-                    # Clean newlines inside headings (e.g., "Annex A (normative):\nTitle")
-                    clean_heading = text.replace("\n", " ")
-                    heading_stack[level] = clean_heading
-
-                    for key in list(heading_stack.keys()):
-                        if key > level:
-                            del heading_stack[key]
-
-                    match = section_pattern.match(clean_heading)
-                    if match:
-                        current_section = match.group(1)
-                        current_title = match.group(2).strip()
+                    heading = text.replace("\n", " ")
+                    heading_stack[level] = heading
+                    for key in [k for k in heading_stack if k > level]:
+                        del heading_stack[key]
+                    m = SECTION_RE.match(heading)
+                    if m:
+                        current_section, current_title = m.group(1), m.group(2).strip()
                     else:
-                        # Handle Annexes (e.g., "Annex A (normative): ...")
-                        current_section = clean_heading.split(":")[0].strip()
-                        current_title = clean_heading
-
+                        current_section, current_title = heading.split(":")[0].strip(), heading
                 continue
-
-            # Skip standalone Figure captions (since images are not extracted)
-            if style_name == "TF":
+            if style == "TF":
                 continue
+            blocks.append(base("paragraph", text, style))
+        elif isinstance(element, CT_Tbl) and capture:
+            text = table_to_text(Table(element, doc))
+            if text.strip():
+                blocks.append(base("table", text))
 
-            section_path = " > ".join(
-                heading_stack[level] for level in sorted(heading_stack)
-            )
-
-            blocks.append({
-                "type": "paragraph",
-                "text": text,
-                "style": style_name,
-                "specification": specification,
-                "release": release,
-                "section": current_section,
-                "title": current_title,
-                "hierarchy": section_path,
-            })
-
-        # ----------------------------------------------------
-        # CASE 2: TABLE
-        # ----------------------------------------------------
-        elif isinstance(element, CT_Tbl) and capture_started:
-            table = Table(element, doc)
-            rows = []
-
-            for row in table.rows:
-                cells = [
-                    cell.text.strip().replace("\n", " ")
-                    for cell in row.cells
-                ]
-                rows.append(" | ".join(cells))
-
-            table_text = "\n".join(rows)
-
-            if not table_text.strip():
-                continue
-
-            section_path = " > ".join(
-                heading_stack[level] for level in sorted(heading_stack)
-            )
-
-            blocks.append({
-                "type": "table",
-                "text": table_text,
-                "specification": specification,
-                "release": release,
-                "section": current_section,
-                "title": current_title,
-                "hierarchy": section_path,
-            })
-
-    print(f"Extracted blocks count: {len(blocks)}")
+    print(f"  blocks: {len(blocks)}")
     return blocks
 
 
-# ============================================================
-# 3. MAIN EXECUTION
-# ============================================================
-
 def main():
-    doc_23501 = RAW_DIR / "TS_23.501_V18.12.0.docx"
-    doc_24501 = RAW_DIR / "TS_24.501_V18.14.0.docx"
-
-    print("Project root:", PROJECT_ROOT)
-    print("Raw directory:", RAW_DIR)
-
-    blocks_23501 = parse_3gpp_document(doc_23501, "TS 23.501", "18")
-    blocks_24501 = parse_3gpp_document(doc_24501, "TS 24.501", "18")
-
-    all_blocks = blocks_23501 + blocks_24501
-    output_file = PROCESSED_DIR / "parsed_blocks.json"
-
-    with open(output_file, "w", encoding="utf-8") as f:
-        json.dump(all_blocks, f, ensure_ascii=False, indent=4)
+    files = discover_specs()
+    if not files:
+        raise SystemExit("No matching .docx found in data/raw (expected TS_23.501_V18.12.0.docx ...)")
+    write_manifest(files)
+    all_blocks = []
+    for f in files:
+        all_blocks += parse_3gpp_document(f.path, f.specification, f.release, f.version)
+    out = PROCESSED_DIR / "parsed_blocks.json"
+    out.write_text(json.dumps(all_blocks, ensure_ascii=False), encoding="utf-8")
+    print(f"\nSaved {len(all_blocks)} blocks -> {out}")
 
 
 if __name__ == "__main__":

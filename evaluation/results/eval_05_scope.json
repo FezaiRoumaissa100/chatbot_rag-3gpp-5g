@@ -1,0 +1,38 @@
+[
+  {
+    "Configuration": "Core questions | 2 specs",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "Core questions | 4 specs",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.16",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "Extended questions | 2 specs",
+    "N": 14,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.04",
+    "By category": "cross_4spec=0.00, single_23502=0.00, single_33501=0.00"
+  },
+  {
+    "Configuration": "Extended questions | 4 specs",
+    "N": 14,
+    "Recall@15": "0.357",
+    "Full hit": "0.286",
+    "MRR": "0.280",
+    "Latency (s)": "0.16",
+    "By category": "cross_4spec=0.25, single_23502=0.80, single_33501=0.00"
+  }
+]

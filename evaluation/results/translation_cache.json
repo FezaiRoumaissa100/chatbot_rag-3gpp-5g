@@ -1,0 +1,15 @@
+{
+ "Quelles sont les principales fonctions de l’AMF (Access and Mobility Management Function) dans le système 5G ?": "What are the main functions of the AMF (Access and Mobility Management Function) in the 5G system?",
+ "Quelles sont les principales responsabilités de la SMF (Session Management Function) ?": "What are the main responsibilities of the SMF?",
+ "Quels éléments les points de référence N1, N2, N3, N4 et N6 relient-ils dans l’architecture du système 5G ?": "What network functions do reference points N1, N2, N3, N4, and N6 connect in the 5G system architecture according to TS 23.501?",
+ "Quels sont les deux états de gestion de l’enregistrement (RM) en 5GS et que représentent-ils ?": "What are the two Registration Management (RM) states in 5GS and what do they represent?",
+ "Quelle est la différence entre les états CM-IDLE et CM-CONNECTED dans la gestion de la connexion ?": "What is the difference between CM-IDLE and CM-CONNECTED states in connection management?",
+ "Quels sont les trois modes SSC (Session and Service Continuity) définis pour une session PDU ?": "What are the three SSC (Session and Service Continuity) modes defined for a PDU session?",
+ "Que signifie la cause n°9 en 5GMM ?": "What is the meaning of cause value 9 in 5GMM?",
+ "Quand le temporisateur 5GMM T3510 est-il démarré, arrêté, et que se passe-t-il à son expiration ?": "When is the 5GMM timer T3510 started, stopped, and what happens upon its expiry?",
+ "Comment fonctionne la procédure de désenregistrement initiée par l’UE au niveau NAS ?": "How does the UE-initiated deregistration procedure work at the NAS level?",
+ "Quels sont les principaux états 5GMM de l’UE définis dans le TS 24.501 ?": "What are the main 5GMM UE states defined in TS 24.501?",
+ "Décris la procédure d’enregistrement et les messages NAS échangés entre l’UE et l’AMF.": "What is the registration procedure and what are the NAS messages exchanged between the UE and the AMF?",
+ "Comment la SMF gère-t-elle les sessions PDU dans l’architecture 5G, et quels messages NAS 5GSM sont échangés avec l’UE pour établir une session PDU ?": "How does the SMF handle PDU sessions in the 5G architecture, and what 5GSM NAS messages are exchanged with the UE to establish a PDU session?",
+ "Comment un UE passe-t-il de CM-IDLE à CM-CONNECTED en 5GS, et quels messages et procédure NAS déclenchent cette transition ?": "How does a UE transition from CM-IDLE to CM-CONNECTED in 5GS, and which NAS messages and procedures trigger this transition?"
+}

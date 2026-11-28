@@ -30,7 +30,7 @@ def main():
     frontend = subprocess.Popen(
         ["npm", "run", "dev"],
         cwd=ROOT / "interface",
-        shell=True,
+        #shell=True,
     )
 
     print("Backend FastAPI starting on", BACKEND_URL)

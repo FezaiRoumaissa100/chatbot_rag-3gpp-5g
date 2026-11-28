@@ -1,39 +1,36 @@
 from sentence_transformers import SentenceTransformer
 
+from src.config import cfg
+
+
+def collection_name(alias: str) -> str:
+    return "3gpp_" + alias.replace("-", "_")
+
 
 class TextEmbedder:
-    """
-    Wrapper around a local SentenceTransformer embedding model.
-    Handles document encoding (for indexing) and query encoding (for retrieval).
-    """
+    """Registry-driven embedding wrapper (query/document prefixes differ per model family)."""
 
-    def __init__(self, model_name: str = "BAAI/bge-base-en-v1.5"):
-        self.model_name = model_name
-        print(f"Loading local embedding model: {self.model_name}...")
+    def __init__(self, alias: str | None = None):
+        conf = cfg("embedding")
+        self.alias = alias or conf["active"]
+        if self.alias not in conf["models"]:
+            raise KeyError(f"Unknown embedding '{self.alias}'. Known: {list(conf['models'])}")
+        spec = conf["models"][self.alias]
+        self.model_name = spec["hf_name"]
+        self.query_prefix = spec.get("query_prefix", "")
+        self.doc_prefix = spec.get("doc_prefix", "")
+        print(f"Loading embedding model: {self.model_name}")
         self.model = SentenceTransformer(self.model_name)
+        self.model.max_seq_length = conf.get("max_seq_length", 512)
 
-    def encode_documents(self, texts: list[str], batch_size: int = 128) -> list[list[float]]:
-        """Encodes corpus chunks into normalized dense vectors."""
-        embeddings = self.model.encode(
-            texts,
-            batch_size=batch_size,
-            show_progress_bar=False,
-            normalize_embeddings=True,
-        )
-        return embeddings.tolist()
+    @property
+    def collection(self) -> str:
+        return collection_name(self.alias)
+
+    def encode_documents(self, texts: list[str], batch_size: int = 64) -> list[list[float]]:
+        texts = [self.doc_prefix + t for t in texts]
+        return self.model.encode(texts, batch_size=batch_size, show_progress_bar=False,
+                                 normalize_embeddings=True).tolist()
 
     def encode_query(self, query: str) -> list[float]:
-        """
-        Encodes a single user query into a normalized dense vector.
-        Applies the BGE retrieval instruction prefix when using English BGE models.
-        """
-        if "bge" in self.model_name.lower() and "-en-" in self.model_name.lower():
-            formatted_query = f"Represent this sentence for searching relevant passages: {query}"
-        else:
-            formatted_query = query
-
-        embedding = self.model.encode(
-            [formatted_query],
-            normalize_embeddings=True,
-        )
-        return embedding[0].tolist()
+        return self.model.encode([self.query_prefix + query], normalize_embeddings=True)[0].tolist()
