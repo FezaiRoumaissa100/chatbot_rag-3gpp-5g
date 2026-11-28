@@ -1,25 +1,25 @@
 from sentence_transformers import CrossEncoder
 
+from src.config import cfg
+
 
 class CrossEncoderReranker:
-    """Re-scores candidate chunks by jointly encoding (query, chunk_text) pairs."""
+    """Re-scores (query, chunk) pairs jointly. `name` is an alias from config.yaml or a HF model id."""
 
-    def __init__(self, model_name: str = "cross-encoder/ms-marco-MiniLM-L-6-v2"):
-        self.model_name = model_name
-        self.model = CrossEncoder(self.model_name)
+    def __init__(self, name: str | None = None, max_length: int = 512):
+        models = cfg("reranker")["models"]
+        name = name or cfg("reranker")["active"]
+        self.model_name = models.get(name, name)
+        self.model = CrossEncoder(self.model_name, max_length=max_length)
 
     def rerank(self, query: str, candidates: list[dict], top_k: int = 5) -> list[dict]:
         if not candidates:
             return []
-
-        pairs = [(query, c["text"]) for c in candidates]
-        scores = self.model.predict(pairs)
-
-        reranked = []
-        for candidate, score in zip(candidates, scores):
-            item = dict(candidate)
-            item["rerank_score"] = round(float(score), 4)
-            reranked.append(item)
-
-        reranked.sort(key=lambda x: x["rerank_score"], reverse=True)
-        return reranked[:top_k]
+        scores = self.model.predict([(query, c["text"]) for c in candidates])
+        out = []
+        for cand, s in zip(candidates, scores):
+            item = dict(cand)
+            item["rerank_score"] = round(float(s), 4)
+            out.append(item)
+        out.sort(key=lambda x: x["rerank_score"], reverse=True)
+        return out[:top_k]

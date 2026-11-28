@@ -1,23 +1,46 @@
-# Paramètres modifiables sans toucher au code
+# All tunable parameters. Code reads this file (src/config.py); missing keys fall back to defaults.
 corpus:
-  specs:
-    - {name: "TS 23.501", release: "Rel-18", version: "V18.12.0"}
-    - {name: "TS 24.501", release: "Rel-18", version: "V18.14.0"}
+  raw_dir: data/raw
+  default_release: "18"          # used when the question does not mention a release
+  specs: ["TS 23.501", "TS 24.501", "TS 23.502", "TS 33.501"]
 
 chunking:
-  max_tokens: 400
-  overlap_tokens: 40
+  target_chars: 1000
+  max_chars: 1600
+  overlap_chars: 350
 
 embedding:
-  model: "BAAI/bge-base-en-v1.5"   # à comparer avec d'autres modèles
+  active: bge-base               # bge-base | bge-m3 | e5-base
+  max_seq_length: 512
+  models:
+    bge-base: {hf_name: "BAAI/bge-base-en-v1.5", query_prefix: "Represent this sentence for searching relevant passages: ", doc_prefix: "", multilingual: false}
+    bge-m3:   {hf_name: "BAAI/bge-m3", query_prefix: "", doc_prefix: "", multilingual: true}
+    e5-base:  {hf_name: "intfloat/e5-base-v2", query_prefix: "query: ", doc_prefix: "passage: ", multilingual: false}
+
+reranker:
+  active: minilm                 # minilm | bge-base | bge-m3
+  models:
+    minilm:   "cross-encoder/ms-marco-MiniLM-L-6-v2"
+    bge-base: "BAAI/bge-reranker-base"
+    bge-m3:   "BAAI/bge-reranker-v2-m3"
 
 retrieval:
-  top_k_candidates: 30
-  top_k_final: 5
-  use_hybrid: true
+  top_k: 15
+  candidate_pool: 30
+  mode: hybrid                   # hybrid | vector | bm25
+  routing: soft                  # off | hard (legacy) | soft (boost + coverage)
   use_reranker: true
-  use_routing: true
-  reranker_model: "cross-encoder/ms-marco-MiniLM-L-6-v2"
+  vector_weight: 0.6
+  bm25_weight: 0.4
+  rrf_k: 60
+  soft_boost: 1.25
+  coverage: true                 # guarantee chunks from each spec the question touches
+  coverage_min_per_spec: 3
+  min_rerank_score: null         # e.g. 0.01 (sigmoid scale) to refuse before calling the LLM
 
 generation:
+  default_llm: "gemini:gemini-3.5-flash-lite"
+  gemini_models: ["gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.1-flash-lite"]
+  ollama_host: "http://localhost:11434"
+  ollama_num_ctx: 16384
   refusal_message: "I could not find this information in the documents"

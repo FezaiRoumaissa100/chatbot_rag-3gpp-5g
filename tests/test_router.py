@@ -1,86 +1,39 @@
 import sys
 from pathlib import Path
 
-PROJECT_ROOT = Path(__file__).resolve().parents[1]
-if str(PROJECT_ROOT) not in sys.path:
-    sys.path.insert(0, str(PROJECT_ROOT))
-
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
 from src.retrieval.router import QueryRouter
 
-
-TEST_CASES = [
-    # (Catégorie, Question, target_specs attendu, confidence attendue)
-    (
-        "Cross-spec (AMF + NAS)",
-        "Describe the registration procedure and the NAS messages exchanged between the UE and the AMF",
-        None,
-        "cross_spec",
-    ),
-    (
-        "Explicite TS 23.501",
-        "According to TS 23.501, what are the roles of SMF and UPF?",
-        ["TS 23.501"],
-        "explicit",
-    ),
-    (
-        "Explicite TS 24.501",
-        "Check TS 24.501 for 5GMM cause values.",
-        ["TS 24.501"],
-        "explicit",
-    ),
-    (
-        "Implicite TS 23.501 (SBA/QoS)",
-        "How does the NRF discover network functions in Service-Based Architecture using 5QI?",
-        ["TS 23.501"],
-        "high",
-    ),
-    (
-        "Implicite TS 24.501 (Timer/Cause)",
-        "What happens when timer T3510 expires and the UE receives Cause #9?",
-        ["TS 24.501"],
-        "high",
-    ),
-    (
-        "Générale / Ambiguë",
-        "How does a 5G mobile device connect to the network?",
-        None,
-        "cross_spec",
-    ),
-    (
-        "Hors-sujet",
-        "What is the best recipe for chocolate cake?",
-        None,
-        "cross_spec",
-    ),
-]
+R = QueryRouter()
 
 
-def main():
-    router = QueryRouter()
-
-    print("=" * 100)
-    print("DIAGNOSTIC DU ROUTEUR 3GPP (QueryRouter)")
-    print("=" * 100)
-
-    passed = 0
-    for category, query, expected_specs, expected_conf in TEST_CASES:
-        decision = router.route(query)
-        ok = (decision.target_specs == expected_specs) and (decision.confidence == expected_conf)
-        status = "OK" if ok else "ÉCHEC"
-        if ok:
-            passed += 1
-
-        print(f"\n[{status}] {category}")
-        print(f"  Question   : {query}")
-        print(f"  Résultat   : target_specs={decision.target_specs} | confidence={decision.confidence}")
-        print(f"  Raison     : {decision.reason}")
-        if not ok:
-            print(f"  Attendu    : target_specs={expected_specs} | confidence={expected_conf}")
-
-    print("\n" + "=" * 100)
-    print(f"BILAN : {passed}/{len(TEST_CASES)} cas conformes")
-    print("=" * 100)
+def test_explicit_spec_is_hard_filter():
+    d = R.route("According to TS 23.501, what are the roles of SMF and UPF?")
+    assert d.target_specs == ["TS 23.501"] and d.confidence == "explicit"
 
 
-if __name__ == "__main__":
-    main()
+def test_nas_cues_prefer_24501():
+    d = R.route("What happens when timer T3510 expires and the UE receives Cause #9?")
+    assert d.target_specs == ["TS 24.501"] and d.confidence == "high"
+
+
+def test_security_cues_prefer_33501():
+    d = R.route("How does 5G AKA work and what is SUCI?")
+    assert d.preferred_specs == ["TS 33.501"]
+
+
+def test_cross_spec_has_several_preferred_and_no_hard_filter():
+    d = R.route("Describe the registration procedure and the NAS messages exchanged between the UE and the AMF")
+    assert d.target_specs is None and {"TS 23.501", "TS 24.501"} <= set(d.preferred_specs)
+
+
+def test_off_topic_has_no_preference():
+    d = R.route("What is the best recipe for chocolate cake?")
+    assert d.target_specs is None and d.preferred_specs == []
+
+
+def test_release_detection():
+    assert R.route("In Rel-17, what are the SSC modes?").releases == ["17"]
+    d = R.route("Compare the AMF functions between Release 17 and Release 18")
+    assert d.compare and d.releases == ["17", "18"]
+    assert not R.route("What is the difference between SSC mode 2 and 3?").compare

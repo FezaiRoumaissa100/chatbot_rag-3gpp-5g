@@ -1,0 +1,191 @@
+[
+  {
+    "id": "F01",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quelles sont les principales fonctions de l’AMF (Access and Mobility Management Function) dans le système 5G ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.1"
+      }
+    ],
+    "reference_answer": "The AMF terminates N2 and N1 NAS signalling, handles NAS ciphering and integrity protection, and manages registration, connection, reachability and mobility."
+  },
+  {
+    "id": "F02",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quelles sont les principales responsabilités de la SMF (Session Management Function) ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.2"
+      }
+    ],
+    "reference_answer": "The SMF handles PDU session establishment, modification and release, UE IP address allocation and UPF selection and control."
+  },
+  {
+    "id": "F05",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quels éléments les points de référence N1, N2, N3, N4 et N6 relient-ils dans l’architecture du système 5G ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "4.2.2"
+      }
+    ],
+    "reference_answer": "N1: UE-AMF, N2: (R)AN-AMF, N3: (R)AN-UPF, N4: SMF-UPF, N6: UPF-Data Network."
+  },
+  {
+    "id": "F06",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quels sont les deux états de gestion de l’enregistrement (RM) en 5GS et que représentent-ils ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.3.2"
+      }
+    ],
+    "reference_answer": "RM-DEREGISTERED (not registered) and RM-REGISTERED (registered in the AMF)."
+  },
+  {
+    "id": "F07",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quelle est la différence entre les états CM-IDLE et CM-CONNECTED dans la gestion de la connexion ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.3.3"
+      }
+    ],
+    "reference_answer": "CM-IDLE has no NAS signalling connection with the AMF over N1; CM-CONNECTED has one."
+  },
+  {
+    "id": "F08",
+    "category": "single_23501",
+    "language": "fr",
+    "question": "Quels sont les trois modes SSC (Session and Service Continuity) définis pour une session PDU ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.6.9"
+      }
+    ],
+    "reference_answer": "SSC mode 1 keeps the anchor, mode 2 is break-before-make, mode 3 is make-before-break."
+  },
+  {
+    "id": "F11",
+    "category": "single_24501",
+    "language": "fr",
+    "question": "Que signifie la cause n°9 en 5GMM ?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "9.11.3.2"
+      }
+    ],
+    "reference_answer": "5GMM cause #9: UE identity cannot be derived by the network."
+  },
+  {
+    "id": "F14",
+    "category": "single_24501",
+    "language": "fr",
+    "question": "Quand le temporisateur 5GMM T3510 est-il démarré, arrêté, et que se passe-t-il à son expiration ?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "10.2"
+      }
+    ],
+    "reference_answer": "T3510 starts when the UE sends REGISTRATION REQUEST, stops on ACCEPT/REJECT; on expiry the registration procedure is aborted."
+  },
+  {
+    "id": "F16",
+    "category": "single_24501",
+    "language": "fr",
+    "question": "Comment fonctionne la procédure de désenregistrement initiée par l’UE au niveau NAS ?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "5.5.2"
+      }
+    ],
+    "reference_answer": "The UE sends DEREGISTRATION REQUEST and the AMF replies with DEREGISTRATION ACCEPT unless switch-off."
+  },
+  {
+    "id": "F18",
+    "category": "single_24501",
+    "language": "fr",
+    "question": "Quels sont les principaux états 5GMM de l’UE définis dans le TS 24.501 ?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "5.1.3"
+      }
+    ],
+    "reference_answer": "5GMM-NULL, DEREGISTERED, REGISTERED-INITIATED, REGISTERED, DEREGISTERED-INITIATED, SERVICE-REQUEST-INITIATED."
+  },
+  {
+    "id": "F21",
+    "category": "cross_spec",
+    "language": "fr",
+    "question": "Décris la procédure d’enregistrement et les messages NAS échangés entre l’UE et l’AMF.",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.1"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "5.5.1"
+      }
+    ],
+    "reference_answer": "The UE sends REGISTRATION REQUEST; the AMF answers REGISTRATION ACCEPT or REJECT; the UE may send REGISTRATION COMPLETE."
+  },
+  {
+    "id": "F23",
+    "category": "cross_spec",
+    "language": "fr",
+    "question": "Comment la SMF gère-t-elle les sessions PDU dans l’architecture 5G, et quels messages NAS 5GSM sont échangés avec l’UE pour établir une session PDU ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.2"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "6.4.1"
+      }
+    ],
+    "reference_answer": "The SMF manages PDU sessions; the UE sends PDU SESSION ESTABLISHMENT REQUEST and receives ACCEPT or REJECT."
+  },
+  {
+    "id": "F25",
+    "category": "cross_spec",
+    "language": "fr",
+    "question": "Comment un UE passe-t-il de CM-IDLE à CM-CONNECTED en 5GS, et quels messages et procédure NAS déclenchent cette transition ?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.3.3"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "5.6.1"
+      }
+    ],
+    "reference_answer": "The UE runs the service request procedure with SERVICE REQUEST and SERVICE ACCEPT."
+  },
+  {
+    "id": "F99",
+    "category": "out_of_corpus",
+    "language": "fr",
+    "question": "Quel pays a remporté la Coupe du monde de football en 2022 et quel était le score final ?",
+    "expected_sections": [],
+    "reference_answer": "I could not find this information in the documents"
+  }
+]

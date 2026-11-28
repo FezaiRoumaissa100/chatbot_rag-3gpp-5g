@@ -1,0 +1,38 @@
+[
+  {
+    "Configuration": "Core questions | default release filter (Rel-18)",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.16",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "Core questions | NO release filter",
+    "N": 30,
+    "Recall@15": "0.383",
+    "Full hit": "0.300",
+    "MRR": "0.369",
+    "Latency (s)": "0.17",
+    "By category": "cross_spec=0.25, single_23501=0.90, single_24501=0.00"
+  },
+  {
+    "Configuration": "Release questions | release-aware routing",
+    "N": 6,
+    "Recall@15": "0.500",
+    "Full hit": "0.333",
+    "MRR": "0.556",
+    "Latency (s)": "0.27",
+    "By category": "release_17=0.67, release_compare=0.33"
+  },
+  {
+    "Configuration": "Release questions | release-blind (always Rel-18)",
+    "N": 6,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.17",
+    "By category": "release_17=0.00, release_compare=0.00"
+  }
+]

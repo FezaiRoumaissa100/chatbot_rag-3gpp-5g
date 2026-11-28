@@ -1,28 +1,68 @@
 :root {
-  --bg: #ffffff;
-  --bg-secondary: #f4f4f4;
-  --bg-input: #f4f4f4;
-  --text: #0d0d0d;
-  --text-muted: #5d5d5d;
-  --border: #e5e5e5;
-  --accent: #10a37f;
-  --user-bubble: #f4f4f4;
-  --radius: 12px;
-  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  --font: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Inter', 'Segoe UI', system-ui, sans-serif;
+  --mono: 'SF Mono', 'JetBrains Mono', ui-monospace, Consolas, monospace;
+  --ease-spring: cubic-bezier(0.3, 1.35, 0.5, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+
+  --blue: #0a84ff;
+  --violet: #bf5af2;
+  --mint: #30d5c8;
+  --amber: #ff9f0a;
+
+  color-scheme: dark;
+  --bg: #05060a;
+  --fg: #f5f5f7;
+  --fg-2: #a1a1aa;
+  --fg-3: #6b6b76;
+  --line: rgba(255, 255, 255, 0.1);
+  --hl: rgba(255, 255, 255, 0.14);
+  --glass: rgba(26, 28, 38, 0.55);
+  --fill: rgba(255, 255, 255, 0.07);
+  --thumb: rgba(255, 255, 255, 0.16);
+  --spot: rgba(255, 255, 255, 0.1);
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --aurora: 0.5;
+  --code-bg: rgba(255, 255, 255, 0.07);
+  font-family: var(--font);
 }
 
-* {
-  box-sizing: border-box;
+[data-theme='light'] {
+  color-scheme: light;
+  --bg: #f5f5f7;
+  --fg: #1d1d1f;
+  --fg-2: #55555c;
+  --fg-3: #8a8a93;
+  --line: rgba(0, 0, 0, 0.09);
+  --hl: rgba(255, 255, 255, 0.9);
+  --glass: rgba(255, 255, 255, 0.62);
+  --fill: rgba(0, 0, 0, 0.05);
+  --thumb: #ffffff;
+  --spot: rgba(10, 132, 255, 0.12);
+  --shadow: 0 18px 50px rgba(30, 40, 80, 0.14);
+  --aurora: 0.28;
+  --code-bg: rgba(0, 0, 0, 0.06);
 }
 
-html,
-body,
-#root {
-  height: 100%;
-  margin: 0;
-}
-
+* { box-sizing: border-box; }
+html, body, #root { height: 100%; margin: 0; }
 body {
   background: var(--bg);
-  color: var(--text);
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  overflow: hidden;
+}
+button { font: inherit; color: inherit; cursor: pointer; border: 0; background: none; }
+::selection { background: color-mix(in srgb, var(--blue) 40%, transparent); }
+:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: var(--fill); border-radius: 10px; border: 2px solid transparent; background-clip: padding-box; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

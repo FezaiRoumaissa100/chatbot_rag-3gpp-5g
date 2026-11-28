@@ -1,182 +1,98 @@
+"""Builds the vector indexes (one ChromaDB collection per embedding model) and the BM25 index.
+
+    python -m src.indexing.build_index                 # active embedding from config.yaml
+    python -m src.indexing.build_index --model bge-m3  # one specific model
+    python -m src.indexing.build_index --all           # every model in config.yaml (comparison study)
+"""
+import argparse
 import json
 import pickle
-import re
+import sys
 import time
+from collections import Counter
 from pathlib import Path
 
 import chromadb
 from rank_bm25 import BM25Okapi
 
-# Compatible whether run directly (`python src/indexing/indexer.py`) or as a module
-try:
-    from src.indexing.embedder import TextEmbedder
-except ImportError:
-    from embedder import TextEmbedder
-
-# ============================================================
-# 1. CONFIGURATION & PATHS
-# ============================================================
-
 PROJECT_ROOT = Path(__file__).resolve().parents[2]
-CHUNKS_FILE = PROJECT_ROOT / "data" / "processed" / "chunks.json"
+if str(PROJECT_ROOT) not in sys.path:
+    sys.path.insert(0, str(PROJECT_ROOT))
 
+from src.config import cfg
+from src.indexing.embedder import TextEmbedder, collection_name
+from src.retrieval.tokenizer import tokenize_3gpp
+
+CHUNKS_FILE = PROJECT_ROOT / "data" / "processed" / "chunks.json"
 INDEX_DIR = PROJECT_ROOT / "data" / "index"
 CHROMA_DIR = INDEX_DIR / "chroma_db"
 BM25_FILE = INDEX_DIR / "bm25_index.pkl"
-
-COLLECTION_NAME = "3gpp_5g_specs"
-EMBEDDING_MODEL_NAME = "BAAI/bge-base-en-v1.5"
-BATCH_SIZE = 128
+BATCH = 64
 
 
-# ============================================================
-# 2. TELECOM-AWARE TOKENIZER FOR BM25
-# ============================================================
-
-def tokenize_3gpp(text: str) -> list[str]:
-    """
-    Tokenizes text for BM25 while preserving hyphenated 3GPP identifiers
-    (e.g., '5g-guti', 's-nssai', '5gmm-registered', 'ts 24.501').
-    """
-    return re.findall(r"[a-z0-9]+(?:[.-][a-z0-9]+)*", text.lower())
-
-
-# ============================================================
-# 3. VECTOR INDEX BUILDER (CHROMADB)
-# ============================================================
-
-def build_vector_index(chunks: list[dict], embedder: TextEmbedder) -> chromadb.Collection:
-    """Stores dense embeddings and metadata in a persistent ChromaDB collection."""
+def build_vector_index(chunks: list[dict], embedder: TextEmbedder):
     CHROMA_DIR.mkdir(parents=True, exist_ok=True)
     client = chromadb.PersistentClient(path=str(CHROMA_DIR))
-
+    name = collection_name(embedder.alias)
     try:
-        client.delete_collection(name=COLLECTION_NAME)
-        print(f"Existing collection '{COLLECTION_NAME}' cleared.")
+        client.delete_collection(name)
     except Exception:
         pass
-
-    collection = client.create_collection(
-        name=COLLECTION_NAME,
-        metadata={"hnsw:space": "cosine"},
-    )
-
-    total = len(chunks)
-    print(f"\nIndexing {total} chunks into ChromaDB (batch size={BATCH_SIZE})...")
-    start_time = time.time()
-
-    for start_idx in range(0, total, BATCH_SIZE):
-        end_idx = min(start_idx + BATCH_SIZE, total)
-        batch = chunks[start_idx:end_idx]
-
-        ids = [c["chunk_id"] for c in batch]
-        texts = [c["text"] for c in batch]
-        metadatas = [
-            {
-                "specification": c["specification"],
-                "release": str(c["release"]),
-                "section": str(c["section"]),
-                "title": c["title"],
-                "hierarchy": c["hierarchy"],
-                "has_table": bool(c["has_table"]),
-            }
-            for c in batch
-        ]
-
-        embeddings = embedder.encode_documents(texts, batch_size=BATCH_SIZE)
-
-        collection.add(
-            ids=ids,
-            embeddings=embeddings,
-            documents=texts,
-            metadatas=metadatas,
+    col = client.create_collection(name=name, metadata={"hnsw:space": "cosine"})
+    t0 = time.time()
+    for i in range(0, len(chunks), BATCH):
+        batch = chunks[i:i + BATCH]
+        col.add(
+            ids=[c["chunk_id"] for c in batch],
+            embeddings=embedder.encode_documents([c["text"] for c in batch], BATCH),
+            documents=[c["text"] for c in batch],
+            metadatas=[{"specification": c["specification"], "release": str(c["release"]),
+                        "version": c.get("version", ""), "section": str(c["section"]),
+                        "title": c["title"], "hierarchy": c["hierarchy"],
+                        "has_table": bool(c["has_table"])} for c in batch],
         )
-
-        if end_idx % (BATCH_SIZE * 5) == 0 or end_idx == total:
-            elapsed = time.time() - start_time
-            print(f"  Indexed {end_idx}/{total} chunks ({elapsed:.1f}s)")
-
-    return collection
+        if (i // BATCH) % 20 == 0 or i + BATCH >= len(chunks):
+            print(f"  [{embedder.alias}] {min(i + BATCH, len(chunks))}/{len(chunks)} ({time.time()-t0:.0f}s)")
+    return col
 
 
-# ============================================================
-# 4. SPARSE LEXICAL INDEX BUILDER (BM25)
-# ============================================================
-
-def build_bm25_index(chunks: list[dict]) -> BM25Okapi:
-    """Builds and serializes a BM25Okapi lexical index aligned with chunk_ids."""
-    print("\nBuilding BM25 lexical index...")
-    start_time = time.time()
-
-    chunk_ids = [c["chunk_id"] for c in chunks]
-    tokenized_corpus = [tokenize_3gpp(c["text"]) for c in chunks]
-    bm25 = BM25Okapi(tokenized_corpus)
-
+def build_bm25_index(chunks: list[dict]):
+    print("Building BM25 index...")
+    bm25 = BM25Okapi([tokenize_3gpp(c["text"]) for c in chunks])
     INDEX_DIR.mkdir(parents=True, exist_ok=True)
-    payload = {
-        "bm25": bm25,
-        "chunk_ids": chunk_ids,
-    }
-
     with open(BM25_FILE, "wb") as f:
-        pickle.dump(payload, f)
-
-    elapsed = time.time() - start_time
-    print(f"BM25 index saved to {BM25_FILE} ({elapsed:.1f}s)")
-    return bm25
+        pickle.dump({"bm25": bm25, "chunk_ids": [c["chunk_id"] for c in chunks]}, f)
+    print(f"  saved {BM25_FILE}")
 
 
-# ============================================================
-# 5. SANITY CHECK & MAIN EXECUTION
-# ============================================================
-
-def run_sanity_check(collection: chromadb.Collection, embedder: TextEmbedder):
-    """Runs a quick test query to verify vector retrieval."""
-    print("\n" + "=" * 60)
-    print("INDEX SANITY CHECK")
-    print("=" * 60)
-
-    test_query = "What are the 5GMM states in 5GS?"
-    query_vec = embedder.encode_query(test_query)
-
-    results = collection.query(
-        query_embeddings=[query_vec],
-        n_results=3,
-    )
-
-    print(f"Test query: '{test_query}'\nTop 3 vector matches:")
-    for rank, (cid, meta, dist) in enumerate(
-        zip(results["ids"][0], results["metadatas"][0], results["distances"][0]),
-        start=1,
-    ):
-        similarity = 1 - dist
-        print(
-            f"  {rank}. [{meta['specification']} | Sec {meta['section']} - {meta['title']}] "
-            f"(id={cid}, score={similarity:.4f})"
-        )
+def sanity_check(col, embedder: TextEmbedder):
+    q = "What are the 5GMM states in 5GS?"
+    r = col.query(query_embeddings=[embedder.encode_query(q)], n_results=3)
+    print(f"  sanity '{q}'")
+    for cid, m, d in zip(r["ids"][0], r["metadatas"][0], r["distances"][0]):
+        print(f"    {m['specification']} Rel-{m['release']} §{m['section']} ({1-d:.3f}) {cid}")
 
 
 def main():
-    if not CHUNKS_FILE.exists():
-        raise FileNotFoundError(f"Chunks file not found: {CHUNKS_FILE}")
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--model", action="append", help="embedding alias (repeatable)")
+    ap.add_argument("--all", action="store_true")
+    ap.add_argument("--skip-bm25", action="store_true")
+    args = ap.parse_args()
 
-    print(f"Loading chunks from {CHUNKS_FILE}...")
-    with open(CHUNKS_FILE, "r", encoding="utf-8") as f:
-        chunks = json.load(f)
-    print(f"Loaded {len(chunks)} chunks.")
+    chunks = json.loads(CHUNKS_FILE.read_text(encoding="utf-8"))
+    print(f"{len(chunks)} chunks:")
+    for (s, r), n in sorted(Counter((c["specification"], c["release"]) for c in chunks).items()):
+        print(f"  {s} Rel-{r}: {n}")
 
-    embedder = TextEmbedder(model_name=EMBEDDING_MODEL_NAME)
-    collection = build_vector_index(chunks, embedder)
-    build_bm25_index(chunks)
-
-    print("\n====================================================")
-    print("INDEXING COMPLETED SUCCESSFULLY")
-    print("====================================================")
-    print(f"ChromaDB count : {collection.count()} vectors")
-    print(f"ChromaDB path  : {CHROMA_DIR}")
-    print(f"BM25 path      : {BM25_FILE}")
-
-    run_sanity_check(collection, embedder)
+    aliases = list(cfg("embedding")["models"]) if args.all else (args.model or [cfg("embedding")["active"]])
+    for alias in aliases:
+        emb = TextEmbedder(alias)
+        sanity_check(build_vector_index(chunks, emb), emb)
+        del emb
+    if not args.skip_bm25:
+        build_bm25_index(chunks)
+    print("\nIndexing finished.")
 
 
 if __name__ == "__main__":

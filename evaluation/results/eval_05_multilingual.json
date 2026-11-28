@@ -1,0 +1,38 @@
+[
+  {
+    "Configuration": "French | bge-base | raw French",
+    "N": 13,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "French | bge-base | translated to EN",
+    "N": 13,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.04",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "French | bge-m3 | raw French",
+    "N": 13,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.05",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "French | bge-m3 | translated to EN",
+    "N": 13,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.05",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  }
+]

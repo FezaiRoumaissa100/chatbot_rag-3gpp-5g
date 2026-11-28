@@ -1,0 +1,47 @@
+[
+  {
+    "Configuration": "K = 3",
+    "N": 30,
+    "Recall@3": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "K = 5",
+    "N": 30,
+    "Recall@5": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "K = 10",
+    "N": 30,
+    "Recall@10": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "K = 15",
+    "N": 30,
+    "Recall@15": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  },
+  {
+    "Configuration": "K = 20",
+    "N": 30,
+    "Recall@20": "0.000",
+    "Full hit": "0.000",
+    "MRR": "0.000",
+    "Latency (s)": "0.03",
+    "By category": "cross_spec=0.00, single_23501=0.00, single_24501=0.00"
+  }
+]

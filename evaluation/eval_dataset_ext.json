@@ -1,0 +1,303 @@
+[
+  {
+    "id": "X01",
+    "category": "single_23502",
+    "question": "Describe the general registration procedure in 5GS: which messages and network functions are involved between the UE, the (R)AN, the AMF, the AUSF and the UDM?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.2.2.2.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The UE sends a Registration Request through the (R)AN to the AMF; the AMF may authenticate the UE with the AUSF, registers with the UDM and retrieves subscription data, then answers with Registration Accept and the UE confirms with Registration Complete when required."
+  },
+  {
+    "id": "X02",
+    "category": "single_23502",
+    "question": "How does the UE triggered Service Request procedure work and which network functions take part?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.2.3.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The UE in CM-IDLE sends a Service Request to the AMF; the AMF may involve the SMF to activate user plane connections of the PDU sessions, and answers with Service Accept."
+  },
+  {
+    "id": "X03",
+    "category": "single_23502",
+    "question": "What are the steps of the UE-requested PDU Session Establishment procedure involving the AMF, SMF, UPF and PCF?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.3.2.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The UE sends a PDU Session Establishment Request via the AMF; the AMF selects an SMF; the SMF retrieves subscription data, may obtain policy from the PCF, selects a UPF and configures it over N4, and the PDU Session Establishment Accept is returned to the UE."
+  },
+  {
+    "id": "X04",
+    "category": "single_23502",
+    "question": "Describe the Xn based inter NG-RAN handover procedure in 5GS.",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.9.1"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The source NG-RAN prepares the target NG-RAN over Xn; after execution the target NG-RAN sends a Path Switch Request to the AMF and the user plane path is updated towards the target."
+  },
+  {
+    "id": "X05",
+    "category": "single_23502",
+    "question": "How does the network-initiated de-registration procedure work in the 5G core?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.2.2.3"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The network (for example the AMF or UDM) initiates de-registration by sending a Deregistration Request to the UE and releases the related PDU sessions."
+  },
+  {
+    "id": "X06",
+    "category": "single_33501",
+    "question": "How does the 5G AKA authentication procedure work and what are the roles of the AUSF and UDM/ARPF?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.1.3.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "In 5G AKA the UDM/ARPF generates the authentication vector, the AUSF verifies the response from the UE and the SEAF in the serving network takes part in the exchange."
+  },
+  {
+    "id": "X07",
+    "category": "single_33501",
+    "question": "What is the SUCI and how is the SUPI concealed to protect subscription privacy?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.12"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The SUPI is concealed by the UE into a SUCI using the home network public key; the SIDF at the home network de-conceals it."
+  },
+  {
+    "id": "X08",
+    "category": "single_33501",
+    "question": "What is the difference between EAP-AKA' and 5G AKA primary authentication methods?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.1.3.1"
+      },
+      {
+        "specification": "TS 33.501",
+        "section": "6.1.3.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "Both are primary authentication methods that provide mutual authentication; EAP-AKA' runs inside the EAP framework while 5G AKA uses a 5G-specific message flow."
+  },
+  {
+    "id": "X09",
+    "category": "single_33501",
+    "question": "What is the key hierarchy in 5G, including KAUSF, KSEAF, KAMF and the NAS keys?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.2"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The keys are derived hierarchically: KAUSF leads to KSEAF, then KAMF, from which the NAS integrity and ciphering keys are derived."
+  },
+  {
+    "id": "X10",
+    "category": "single_33501",
+    "question": "How is NAS signalling protected by integrity and ciphering, and how is the NAS security mode command procedure used?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.7"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "NAS messages are integrity protected and optionally ciphered with the selected NAS algorithms, which are activated through the NAS security mode command procedure."
+  },
+  {
+    "id": "X11",
+    "category": "cross_4spec",
+    "question": "How is primary authentication specified: which security mechanisms does TS 33.501 define and which NAS messages does TS 24.501 use between the UE and the AMF?",
+    "expected_sections": [
+      {
+        "specification": "TS 33.501",
+        "section": "6.1"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "5.4.1"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "TS 33.501 defines 5G AKA and EAP-AKA'; TS 24.501 defines AUTHENTICATION REQUEST, RESPONSE, FAILURE and REJECT."
+  },
+  {
+    "id": "X12",
+    "category": "cross_4spec",
+    "question": "How does the NAS security mode control procedure in TS 24.501 relate to the NAS security requirements in TS 33.501?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "5.4.2"
+      },
+      {
+        "specification": "TS 33.501",
+        "section": "6.7"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The NAS SECURITY MODE COMMAND activates the NAS security context whose algorithms and keys are defined by TS 33.501."
+  },
+  {
+    "id": "X13",
+    "category": "cross_4spec",
+    "question": "Compare the registration call flow in TS 23.502 with the NAS registration procedure in TS 24.501.",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.2.2.2"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "5.5.1"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "TS 23.502 describes the system-level call flow among network functions, TS 24.501 the NAS messages and UE/AMF behaviour."
+  },
+  {
+    "id": "X14",
+    "category": "cross_4spec",
+    "question": "Which network functions take part in PDU session establishment and which 5GSM NAS messages does the UE exchange?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.502",
+        "section": "4.3.2.2"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "6.4.1"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "AMF, SMF, UPF and PCF take part; the UE exchanges PDU SESSION ESTABLISHMENT REQUEST and ACCEPT/REJECT."
+  },
+  {
+    "id": "X15",
+    "category": "release_17",
+    "question": "According to Release 17, what are the main functions of the Access and Mobility Management Function (AMF)?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.1",
+        "release": "17"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The AMF terminates N2 and N1 NAS signalling, handles NAS ciphering and integrity protection, registration, connection, reachability and mobility management."
+  },
+  {
+    "id": "X16",
+    "category": "release_17",
+    "question": "In Rel-17, what are the SSC modes defined for a PDU Session?",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.6.9",
+        "release": "17"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "SSC modes 1, 2 and 3 define how session and service continuity is handled for the UPF anchor."
+  },
+  {
+    "id": "X17",
+    "category": "release_17",
+    "question": "In Release 17 of the NAS specification, what are the main 5GMM states in the UE?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "5.1.3",
+        "release": "17"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "5GMM-NULL, 5GMM-DEREGISTERED, 5GMM-REGISTERED-INITIATED, 5GMM-REGISTERED, 5GMM-DEREGISTERED-INITIATED and 5GMM-SERVICE-REQUEST-INITIATED."
+  },
+  {
+    "id": "X18",
+    "category": "release_compare",
+    "question": "Compare the main functions of the AMF between Release 17 and Release 18 of TS 23.501.",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.1",
+        "release": "17"
+      },
+      {
+        "specification": "TS 23.501",
+        "section": "6.2.1",
+        "release": "18"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The core AMF functions are described in both releases; any differences must come from the two versions of clause 6.2.1."
+  },
+  {
+    "id": "X19",
+    "category": "release_compare",
+    "question": "What changed in the list of 5GMM timers between Rel-17 and Rel-18?",
+    "expected_sections": [
+      {
+        "specification": "TS 24.501",
+        "section": "10.2",
+        "release": "17"
+      },
+      {
+        "specification": "TS 24.501",
+        "section": "10.2",
+        "release": "18"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The answer must be derived from the timer tables of clause 10.2 of the two releases."
+  },
+  {
+    "id": "X20",
+    "category": "release_compare",
+    "question": "Compare the SSC mode definitions in Release 17 and Release 18 of TS 23.501.",
+    "expected_sections": [
+      {
+        "specification": "TS 23.501",
+        "section": "5.6.9",
+        "release": "17"
+      },
+      {
+        "specification": "TS 23.501",
+        "section": "5.6.9",
+        "release": "18"
+      }
+    ],
+    "key_facts": [],
+    "reference_answer": "The answer must be derived from clause 5.6.9 of the two releases."
+  }
+]
